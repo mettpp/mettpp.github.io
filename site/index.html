@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Property Portfolio</title>
+<meta name="description" content="Screen Indonesian cities, find a property in Jakarta, and run the assets you own.">
+<style>
+/* Home: one big start page for the three tools. Same paper, ink and green as the asset app. */
+:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --wash:#203029; --blue:#6cb6e0; color-scheme:dark; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; }
+a { color:var(--green-dark); text-underline-offset:2px; }
+:focus-visible { outline:3px solid var(--green); outline-offset:2px; border-radius:4px; }
+.wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
+.hero { padding:72px 0 40px; }
+.hero h1 { font-size:clamp(36px, 6vw, 64px); line-height:1.05; letter-spacing:-.03em; margin:0 0 16px; max-width:16ch; }
+.hero p { font-size:clamp(17px, 2vw, 21px); color:var(--ink-2); margin:0; max-width:52ch; }
+.resume { margin-top:28px; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
+.resume[hidden] { display:none; }
+.btn { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#fff; border-radius:8px; padding:12px 18px; font-weight:600; text-decoration:none; }
+.btn:hover { background:var(--green-dark); color:#fff; }
+@media (prefers-color-scheme: dark) { .btn, .btn:hover { color:#0d1311; } }
+.resume small { color:var(--ink-2); }
+.tools { display:grid; gap:16px; grid-template-columns:repeat(3, minmax(0, 1fr)); padding-bottom:48px; }
+@media (max-width:900px) { .tools { grid-template-columns:1fr; } .hero { padding:44px 0 28px; } }
+.tool { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:12px; min-width:0; text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s; }
+a.tool:hover { border-color:var(--green); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+.step { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:flex; gap:10px; align-items:center; }
+.step svg { width:26px; height:26px; fill:none; stroke:var(--green); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.tool h2 { margin:0; font-size:26px; letter-spacing:-.02em; line-height:1.15; }
+.tool p { margin:0; color:var(--ink-2); }
+.live { margin-top:auto; border-top:1px solid var(--line); padding-top:12px; font-size:14px; min-height:64px; }
+.live ol { margin:4px 0 0; padding-left:20px; }
+.live li { font-variant-numeric:tabular-nums; }
+.live .k { color:var(--ink-2); font-size:13px; }
+.go { font-weight:600; color:var(--green-dark); }
+.tool.jkt .step svg { stroke:var(--blue); }
+footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
+footer p { margin:0 0 6px; max-width:90ch; }
+</style>
+</head>
+<body>
+<script src="site-menu.js" data-section="home"></script>
+<main class="wrap">
+  <section class="hero">
+    <h1 data-t="title">Find it, check it, run it.</h1>
+    <p data-t="lead">Screen Indonesian cities for where to invest, find the property in Jakarta worth a site visit, and keep the rent, bills and papers of what you own in one place.</p>
+    <div class="resume" id="resume" hidden>
+      <a class="btn" id="resume-link" href="#"></a>
+      <small data-t="resumeNote">You can switch any time from the Menu button at the top.</small>
+    </div>
+  </section>
+
+  <section class="tools" aria-label="Sections">
+    <a class="tool" id="t-screening" href="#">
+      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/></svg><span data-t="s1">1 · Where</span></span>
+      <h2 data-t="screening">City screening</h2>
+      <p data-t="screeningLead">27 Indonesian locations ranked for develop and sell, buy to sell or buy to rent, from price growth, yields, demand, liquidity and hazards, nudged daily by the news.</p>
+      <div class="live" id="live-screening"><span class="k" data-t="loading">Loading today's ranking…</span></div>
+      <span class="go" data-t="open">Open →</span>
+    </a>
+    <a class="tool jkt" id="t-jakarta" href="#">
+      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span data-t="s2">2 · Which</span></span>
+      <h2 data-t="jakarta">Jakarta finder</h2>
+      <p data-t="jakartaLead">Load the listings or plots you are looking at and rank each one for buy to rent, buy to sell or redevelopment, with flood, transit, certificate and price checks.</p>
+      <div class="live"><span class="k" data-t="jakartaLive">Your property lists stay in your browser only.</span></div>
+      <span class="go" data-t="open">Open →</span>
+    </a>
+    <a class="tool" id="t-assets" href="#">
+      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="s3">3 · Run</span></span>
+      <h2 data-t="assets">My assets</h2>
+      <p data-t="assetsLead">Rent, deposits, utility bills and taxes, documents and finance for your portfolio, for you and your managers, collectors and accountant. Needs a sign-in.</p>
+      <div class="live" id="live-assets"></div>
+      <span class="go" id="assets-go" data-t="signIn">Sign in →</span>
+    </a>
+  </section>
+</main>
+<footer><div class="wrap">
+  <p data-t="foot1">The screening tools are for deciding where to look closer. They are not investment, legal or engineering advice: check titles with a notary/PPAT, visit the site and survey its hazards before buying.</p>
+  <p data-t="foot2">Your assets' pins and outlines reach the maps through the asset app's shared feed, which only carries name, type, city, pin and outline. Prices, rent and tenants stay behind the asset app's sign-in.</p>
+</div></footer>
+
+<script>
+(function () {
+  "use strict";
+  const M = window.SiteMenu;
+  const T = {
+    en: {},
+    id: {
+      title: "Temukan, periksa, kelola.",
+      lead: "Saring kota di Indonesia untuk investasi, temukan properti di Jakarta yang layak disurvei, dan simpan sewa, tagihan serta dokumen aset Anda di satu tempat.",
+      resumeNote: "Anda bisa pindah kapan saja lewat tombol Menu di atas.", resume: "Lanjut ke",
+      s1: "1 · Di mana", s2: "2 · Yang mana", s3: "3 · Kelola",
+      screening: "Penyaringan kota", jakarta: "Pencari Jakarta", assets: "Aset saya",
+      screeningLead: "27 lokasi di Indonesia diperingkat untuk bangun dan jual, beli untuk dijual atau beli untuk disewakan, dari pertumbuhan harga, imbal hasil, permintaan, likuiditas dan bencana, disesuaikan setiap hari dengan berita.",
+      jakartaLead: "Muat listing atau kavling yang Anda incar dan peringkatkan masing-masing untuk disewakan, dijual kembali atau dibangun ulang, dengan cek banjir, transportasi, sertifikat dan harga.",
+      jakartaLive: "Daftar properti Anda hanya tersimpan di peramban ini.",
+      assetsLead: "Sewa, deposit, tagihan listrik, air dan pajak, dokumen serta keuangan portofolio, untuk Anda, manajer, penagih dan akuntan. Perlu masuk.",
+      loading: "Memuat peringkat hari ini…", open: "Buka →", signIn: "Masuk →",
+      top: "Teratas hari ini, seimbang", updated: "Diperbarui",
+      noScores: "Peringkat terbaru ada di dalam.", feedCount: n => `${n} aset di peta`, feedCities: "Kota",
+      noApp: "Tautan muncul setelah aplikasi aset di-hosting.", noFeed: "Hubungkan aset Anda ke peta lewat Pengaturan > Shared feed di aplikasi aset.",
+      foot1: "Alat penyaringan ini untuk memutuskan di mana melihat lebih dekat, bukan nasihat investasi, hukum atau teknik: periksa sertifikat lewat notaris/PPAT, survei lokasi dan risikonya sebelum membeli.",
+      foot2: "Pin dan batas aset Anda sampai ke peta lewat shared feed aplikasi aset, yang hanya berisi nama, jenis, kota, pin dan batas. Harga, sewa dan penyewa tetap di balik login aplikasi aset.",
+    },
+  };
+  const EN = { resume: "Continue to", top: "Top today, balanced", updated: "Updated", noScores: "The latest ranking is inside.",
+    feedCount: n => `${n} assets on the maps`, feedCities: "Cities", noApp: "The link appears here once the asset app is hosted.",
+    noFeed: "Connect your assets to the maps under Settings > Shared feed in the asset app." };
+  const tr = k => { const l = M ? M.lang() : "en"; const v = (T[l] || {})[k]; return v !== undefined ? v : EN[k]; };
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const EN_TEXT = {};
+  document.querySelectorAll("[data-t]").forEach(el => { EN_TEXT[el.dataset.t] = el.textContent; });
+
+  const links = M ? M.links : { screening: "RE-screening/", jakarta: "RE-jkt/" };
+  $("#t-screening").href = links.screening;
+  $("#t-jakarta").href = links.jakarta;
+
+  let scores = null, feed = null;
+
+  function paint() {
+    const l = M ? M.lang() : "en";
+    document.documentElement.lang = l;
+    document.querySelectorAll("[data-t]").forEach(el => { const v = (T[l] || {})[el.dataset.t]; el.textContent = typeof v === "string" ? v : EN_TEXT[el.dataset.t]; });
+
+    const last = (() => { try { return localStorage.getItem("site-last"); } catch (e) { return null; } })();
+    const app = M ? M.assetApp() : "";
+    const target = { screening: links.screening, jakarta: links.jakarta, assets: app }[last];
+    if (target) { $("#resume").hidden = false; $("#resume-link").href = target; $("#resume-link").textContent = `${tr("resume")} ${tr(last) || EN_TEXT[last]} →`; }
+
+    const assets = $("#t-assets");
+    if (app) { assets.href = app; assets.removeAttribute("aria-disabled"); $("#assets-go").hidden = false; }
+    else { assets.removeAttribute("href"); assets.setAttribute("aria-disabled", "true"); $("#assets-go").hidden = true; }
+    $("#live-assets").innerHTML = !app ? `<span class="k">${esc(tr("noApp"))}</span>`
+      : feed ? `<b>${esc(tr("feedCount")(feed.n))}</b><br><span class="k">${esc(tr("feedCities"))}: ${esc(feed.cities.join(", "))}</span>`
+      : `<span class="k">${esc(tr("noFeed"))}</span>`;
+
+    const box = $("#live-screening");
+    if (scores === false) box.innerHTML = `<span class="k">${esc(tr("noScores"))}</span>`;
+    else if (scores) box.innerHTML = `<span class="k">${esc(tr("top"))} · ${esc(tr("updated"))} ${esc(new Date(scores.generated).toLocaleDateString(l === "id" ? "id-ID" : "en-GB", { day: "numeric", month: "short" }))}</span>
+      <ol>${scores.top.map(r => `<li>${esc(r.location)} <span class="k">${r.index}</span></li>`).join("")}</ol>`;
+  }
+
+  // Today's top three from the city screening's own published scores (balanced strategy, news included),
+  // computed the same way as its dashboard.
+  function loadScores() {
+    const s = document.createElement("script");
+    s.src = links.screening + "scores.js";
+    s.onload = () => {
+      const S = window.SCORES;
+      if (!S || !S.weights || !S.weights.balanced) { scores = false; return paint(); }
+      const w = S.weights.balanced;
+      const idx = r => { let t = 0, n = 0; for (const f in w) { const v = r.subscores[f]; if (v != null && w[f] > 0) { t += v * w[f]; n += w[f]; } } return n ? Math.round(t / n) : 0; };
+      const top = S.locations.map(r => ({ location: r.location, index: idx(r) })).sort((a, b) => b.index - a.index).slice(0, 3);
+      scores = { generated: S.generated, top };
+      paint();
+    };
+    s.onerror = () => { scores = false; paint(); };
+    document.head.append(s);
+  }
+
+  // Your assets, from the shared feed link pasted under My assets on either map (same site, same browser).
+  function loadFeed() {
+    let link = "";
+    try { link = localStorage.getItem("shared-feed-link") || ""; } catch (e) { return; }
+    if (!link) return;
+    fetch(link, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => {
+      if (!d || !Array.isArray(d.features)) return;
+      const cities = [...new Set(d.features.map(f => f.properties && f.properties.city).filter(Boolean))].sort();
+      feed = { n: d.features.length, cities: cities.slice(0, 6).concat(cities.length > 6 ? ["…"] : []) };
+      paint();
+    }).catch(() => {});
+  }
+
+  document.addEventListener("site-lang", paint);
+  paint();
+  loadScores();
+  loadFeed();
+})();
+</script>
+</body>
+</html>
