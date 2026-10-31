@@ -15,7 +15,7 @@
   const SITE = "https://mettpp.github.io/";
   // Address of the asset app once it is hosted, e.g. "https://assets.example.com/". While blank, the
   // menu uses the app that the shared feed link (pasted under My assets on a map) points to, if any.
-  const ASSET_APP = "";
+  const ASSET_APP = "https://re-asset.onrender.com/";
   const PRODUCT = "Property Portfolio";
 
   const T = {
@@ -64,8 +64,11 @@
 .sm-mark svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .sm-here{color:var(--sm-ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .sm-here::before{content:"/";margin-right:10px;color:var(--sm-line)}
-.sm-btn{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:14px;color:var(--sm-ink);
-  background:transparent;border:1px solid var(--sm-line);border-radius:8px;padding:7px 12px;min-height:38px;cursor:pointer}
+.sm-lang{margin-left:auto;font:inherit;font-weight:600;font-size:13px;color:var(--sm-ink2);background:transparent;border:1px solid var(--sm-line);
+  border-radius:8px;padding:7px 10px;min-height:44px;min-width:44px;cursor:pointer;white-space:nowrap}
+.sm-lang:hover{background:var(--sm-wash);color:var(--sm-ink)}
+.sm-btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:14px;color:var(--sm-ink);
+  background:transparent;border:1px solid var(--sm-line);border-radius:8px;padding:7px 12px;min-height:44px;cursor:pointer}
 .sm-btn:hover{background:var(--sm-wash)}
 .sm-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .sm-bar :focus-visible{outline:3px solid var(--sm-green);outline-offset:2px;border-radius:6px}
@@ -79,8 +82,6 @@
 .sm-panel a svg{grid-row:span 2;width:22px;height:22px;fill:none;stroke:var(--sm-green);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sm-panel b{font-weight:600}.sm-panel small{color:var(--sm-ink2);font-size:13px}
 .sm-panel a.sm-off{opacity:.6;pointer-events:none}
-.sm-foot{border-top:1px solid var(--sm-line);margin-top:6px;padding:8px 10px 2px}
-.sm-foot button{font:inherit;font-size:13px;color:var(--sm-green);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
 @media print{.sm-bar{display:none}}`;
 
   const ICON = {
@@ -96,9 +97,12 @@
     const t = T[lang()] || T.en;
     const app = assetApp();
     const item = (k, url, sub, ext) => `<a href="${esc(url || "#")}"${k === section ? ' aria-current="page"' : ""}${url ? "" : ' class="sm-off" aria-disabled="true"'}${ext && url ? ' target="_blank" rel="noopener"' : ""}>${svg(ICON[k])}<b>${t[k]}</b><small>${sub}</small></a>`;
+    // The language toggle sits in the bar itself, not only inside the collapsed Menu panel: this product
+    // is Indonesia-only, so a visitor on an English-locale device needs a visible, one-click EN/ID switch.
     bar.innerHTML = `<div class="sm-in">
   <a class="sm-brand" href="${LINKS.home}"><span class="sm-mark">${svg(ICON.assets)}</span>${PRODUCT}</a>
   ${section !== "home" ? `<span class="sm-here">${t[section] || ""}</span>` : ""}
+  <button type="button" class="sm-lang" data-lang aria-label="${lang() === "id" ? "Switch to English" : "Ganti ke Bahasa Indonesia"}">${lang() === "id" ? "EN" : "ID"}</button>
   <button type="button" class="sm-btn" aria-expanded="false" aria-controls="sm-panel">${svg('<path d="M4 7h16M4 12h16M4 17h16"/>')}${t.menu}</button>
   <nav class="sm-panel" id="sm-panel" aria-label="${t.sections}" hidden>
     <h2>${t.sections}</h2>
@@ -106,7 +110,6 @@
     ${item("screening", LINKS.screening, t.screeningSub)}
     ${item("jakarta", LINKS.jakarta, t.jakartaSub)}
     ${item("assets", app, app ? t.assetsSub : t.assetsNone, true)}
-    <div class="sm-foot"><button type="button" data-lang>${t.lang}</button></div>
   </nav>
 </div>`;
     const btn = bar.querySelector(".sm-btn"), panel = bar.querySelector(".sm-panel");
@@ -115,7 +118,6 @@
     bar.querySelector("[data-lang]").onclick = () => {
       put("site-lang", lang() === "id" ? "en" : "id");
       render(bar);
-      bar.querySelector(".sm-btn").click();
       document.dispatchEvent(new CustomEvent("site-lang", { detail: lang() }));
     };
     bar.onkeydown = e => { if (e.key === "Escape" && !panel.hidden) { open(false); btn.focus(); } };
