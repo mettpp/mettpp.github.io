@@ -7,8 +7,8 @@
 <meta name="description" content="Screen Indonesian cities, find a property in Jakarta, and run the assets you own.">
 <style>
 /* Home: one big start page for the three tools. Same paper, ink and green as the asset app. */
-:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light; }
-@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --wash:#203029; --blue:#6cb6e0; color-scheme:dark; } }
+:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --on-green:#fff; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light; }
+@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --on-green:#0d1311; --wash:#203029; --blue:#6cb6e0; color-scheme:dark; } }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; accent-color:var(--green); }
 a { color:var(--green-dark); text-underline-offset:2px; }
@@ -21,9 +21,8 @@ a { color:var(--green-dark); text-underline-offset:2px; }
 .reassure svg { width:15px; height:15px; flex:none; margin-top:2px; fill:none; stroke:var(--green); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .resume { margin-top:28px; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; }
 .resume[hidden] { display:none; }
-.btn { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#fff; border-radius:8px; padding:12px 18px; font-weight:600; text-decoration:none; }
-.btn:hover { background:var(--green-dark); color:#fff; }
-@media (prefers-color-scheme: dark) { .btn, .btn:hover { color:#0d1311; } }
+.btn { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:var(--on-green); border-radius:8px; padding:12px 18px; font-weight:600; text-decoration:none; }
+.btn:hover { background:var(--green-dark); color:var(--on-green); }
 .resume small { color:var(--ink-2); }
 .tools { display:grid; gap:16px; grid-template-columns:repeat(3, minmax(0, 1fr)); padding-bottom:48px; }
 @media (max-width:900px) { .tools { grid-template-columns:1fr; } .hero { padding:44px 0 28px; } }
@@ -45,15 +44,14 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
    the product's own "1 · Where / 2 · Which / 3 · Run" sequence implies, instead of three equal-weight choices. */
 .tools.lead-screening .tool#t-screening { border-color:var(--green); box-shadow:0 1px 0 var(--green) inset; }
 @media (min-width:901px) { .tools.lead-screening .tool#t-screening { padding:28px; } .tools.lead-screening .tool:not(#t-screening) { opacity:.88; } }
-.start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
-@media (prefers-color-scheme: dark) { .start-badge { color:#0d1311; } }
+.start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:var(--on-green); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
 .start-badge[hidden] { display:none; }
 /* The notify link is a sibling of .tool (an <a> can't nest another <a>), positioned so it never steals
    height from .tool-wrap's grid cell — otherwise .tool would be shorter than the other two cards and its
    bottom row (the "Coming soon" badge) would land higher than their "Open →" baseline. */
 .tool-wrap { position:relative; min-width:0; }
 .tool-wrap .tool { height:100%; }
-.notify { position:absolute; top:100%; left:2px; margin-top:8px; font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; }
+.notify { position:absolute; top:100%; left:2px; margin-top:8px; padding:8px 2px; display:inline-block; min-height:44px; box-sizing:border-box; font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; }
 .notify[hidden] { display:none; }
 .soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
 footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
