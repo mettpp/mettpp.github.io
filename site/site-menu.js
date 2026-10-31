@@ -15,7 +15,7 @@
   const SITE = "https://mettpp.github.io/";
   // Address of the asset app once it is hosted, e.g. "https://assets.example.com/". While blank, the
   // menu uses the app that the shared feed link (pasted under My assets on a map) points to, if any.
-  const ASSET_APP = "";
+  const ASSET_APP = "https://re-asset.onrender.com/";
   const PRODUCT = "Property Portfolio";
 
   const T = {

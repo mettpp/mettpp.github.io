@@ -54,6 +54,7 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
 .notify { position:absolute; top:100%; left:2px; margin-top:8px; padding:8px 2px; display:inline-block; min-height:44px; box-sizing:border-box; font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; }
 .notify[hidden] { display:none; }
 .soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
+.soon[hidden] { display:none; }
 footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
 footer p { margin:0 0 6px; max-width:90ch; }
 </style>
@@ -136,7 +137,7 @@ footer p { margin:0 0 6px; max-width:90ch; }
   const EN = { resume: "Continue to", top: "Top today, balanced", updated: "Updated", noScores: "The latest ranking is inside.",
     feedCount: n => `${n} assets on the maps`, feedCities: "Cities", noApp: "The link appears here once the asset app is hosted.",
     noFeed: "Connect your assets to the maps under Settings > Shared feed in the asset app.",
-    feedError: "Couldn't reach your feed — check the link under Settings > Shared feed.", checkLink: "Check your link →" };
+    feedError: "Couldn't reach your feed — check the link under Settings > Shared feed.", checkLink: "Check your link →", signIn: "Sign in →" };
   const tr = k => { const l = M ? M.lang() : "en"; const v = (T[l] || {})[k]; return v !== undefined ? v : EN[k]; };
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
