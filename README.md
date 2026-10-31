@@ -6,7 +6,7 @@ The start page and the shared **Menu** that make the property tools one product:
 |---|---|---|---|
 | Home | Big start page: what each tool is for, today's top cities, your asset count | this repo | `https://mettpp.github.io/` |
 | City screening | Which Indonesian city to invest in | [RE-screening](https://github.com/mettpp/RE-screening) | `https://mettpp.github.io/RE-screening/` |
-| Jakarta finder | Which property in Jakarta to visit | [RE-jkt](https://github.com/mettpp/RE-jkt) | `https://mettpp.github.io/RE-jkt/` |
+| Property finder | Which property to visit, city by city (Jakarta and the other top cities from City screening) | [RE-jkt](https://github.com/mettpp/RE-jkt) | `https://mettpp.github.io/RE-jkt/` (the address stays the same) |
 | My assets | Rent, bills, documents, finance (logins, database) | [RE-asset](https://github.com/mettpp/RE-asset) | its own server, e.g. `https://assets.example.com/` |
 
 Every page has the same slim bar at the top: the product name (back to the home page), the section you are in, and a collapsed **Menu** button that lists the four sections. People rarely switch once they have picked one, so the list stays closed until asked for. The home page remembers the last section you used and offers **Continue to …**. The menu has an English / Bahasa Indonesia switch, remembered per browser.
