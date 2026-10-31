@@ -72,8 +72,11 @@
 .sm-in{max-width:1400px;margin:0 auto;padding:0 16px;min-height:52px;display:flex;align-items:center;gap:12px}
 /* The brand is also the Menu button (see render()): one click opens the cross-product list instead
    of a separate "Menu" button next to it duplicating "where am I" the title already states. */
+/* A persistent (not hover-only) border so the title reads as a button at rest, not a static logo —
+   the chevron alone was too easy to miss, especially once the separate "Menu" button (whose label
+   literally said "Menu") was folded into this control. */
 .sm-brand{display:flex;align-items:center;gap:9px;font:inherit;font-weight:700;letter-spacing:-.01em;color:var(--sm-ink);
-  background:transparent;border:0;padding:6px 8px;margin:-6px -8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  background:transparent;border:1px solid var(--sm-line);padding:6px 8px;margin:-6px -8px;border-radius:8px;cursor:pointer;white-space:nowrap}
 .sm-brand:hover,.sm-brand[aria-expanded=true]{background:var(--sm-wash)}
 .sm-mark{width:26px;height:26px;border-radius:6px;background:#1d6a44;display:grid;place-items:center;flex:none}
 .sm-mark svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
