@@ -1,11 +1,12 @@
 /* Site menu: the one bar that ties the property tools together as one product.
 
-   A slim bar across the top of each page with the product name (back to the home page), the section
-   you are in, and a collapsed Menu button that opens the list of sections. People rarely switch once
-   they have chosen, so the list stays out of the way until asked for.
+   A slim bar across the top of each page: the product name doubles as the Menu button (click it to
+   open the collapsed list of sections), plus the section you are in. People rarely switch once they
+   have chosen, so the list stays out of the way until asked for, and the title no longer needs a
+   separate "Menu" button next to it duplicating "where am I" it already states.
 
    Same file in mettpp.github.io (the home page), RE-screening and RE-jkt. The asset app draws the same
-   bar on the server (RE-asset app/templates/base.html), with the same look.
+   bar on the server (RE-asset app/templates/base.html and _macros.html's site_menu()), same look.
 
    Use: <script src="site-menu.js" data-section="screening" defer></script>
    data-section is one of: home, screening, jakarta.
@@ -18,15 +19,20 @@
   const ASSET_APP = "https://re-asset.onrender.com/";
   const PRODUCT = "Property Portfolio";
 
+  // Mirrors RE-asset's site.* strings (app/translations/{en,id}.json) so the panel reads the same
+  // whichever of the four places you open it from: Property finder as one umbrella entry (it opens
+  // at city screening, the first step), with the two steps as sub-items underneath.
   const T = {
     en: { menu: "Menu", close: "Close menu", sections: "Sections", home: "Home", homeSub: "Start page",
-      screening: "City screening", screeningSub: "Which Indonesian city to invest in",
-      jakarta: "Jakarta finder", jakartaSub: "Which property in Jakarta to visit",
+      finder: "Property finder", finderSub: "Compare cities, then rank the properties in one",
+      screening: "1 · Cities", screeningSub: "Which Indonesian city to invest in",
+      jakarta: "2 · Properties", jakartaSub: "Which property to visit there",
       assets: "My assets", assetsSub: "Rent, bills and documents (sign in)", assetsNone: "Link appears once the asset app is hosted",
       lang: "Bahasa Indonesia" },
     id: { menu: "Menu", close: "Tutup menu", sections: "Bagian", home: "Beranda", homeSub: "Halaman awal",
-      screening: "Penyaringan kota", screeningSub: "Kota mana di Indonesia untuk investasi",
-      jakarta: "Pencari Jakarta", jakartaSub: "Properti mana di Jakarta untuk disurvei",
+      finder: "Pencari properti", finderSub: "Bandingkan kota, lalu peringkatkan properti di sana",
+      screening: "1 · Kota", screeningSub: "Kota mana di Indonesia untuk investasi",
+      jakarta: "2 · Properti", jakartaSub: "Properti mana yang layak disurvei di sana",
       assets: "Aset saya", assetsSub: "Sewa, tagihan dan dokumen (masuk)", assetsNone: "Tautan muncul setelah aplikasi aset di-hosting",
       lang: "English" },
   };
@@ -59,20 +65,22 @@
 @media (prefers-color-scheme:dark){.sm-bar{--sm-paper:#121614;--sm-surface:#1a201d;--sm-ink:#e6ece8;--sm-ink2:#a9b5ae;--sm-line:#2c3531;--sm-green:#5fc3a6;--sm-wash:#203029}}
 .sm-bar *{box-sizing:border-box}
 .sm-in{max-width:1400px;margin:0 auto;padding:0 16px;min-height:52px;display:flex;align-items:center;gap:12px}
-.sm-brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.01em;color:var(--sm-ink);text-decoration:none;white-space:nowrap}
+/* The brand is also the Menu button (see render()): one click opens the cross-product list instead
+   of a separate "Menu" button next to it duplicating "where am I" the title already states. */
+.sm-brand{display:flex;align-items:center;gap:9px;font:inherit;font-weight:700;letter-spacing:-.01em;color:var(--sm-ink);
+  background:transparent;border:0;padding:6px 8px;margin:-6px -8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.sm-brand:hover,.sm-brand[aria-expanded=true]{background:var(--sm-wash)}
 .sm-mark{width:26px;height:26px;border-radius:6px;background:#1d6a44;display:grid;place-items:center;flex:none}
 .sm-mark svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sm-chev{width:14px;height:14px;margin-left:-2px;stroke:var(--sm-ink2);stroke-width:2;fill:none;flex:none;transition:transform .15s}
+.sm-brand[aria-expanded=true] .sm-chev{transform:rotate(180deg)}
 .sm-here{color:var(--sm-ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .sm-here::before{content:"/";margin-right:10px;color:var(--sm-line)}
 .sm-lang{margin-left:auto;font:inherit;font-weight:600;font-size:13px;color:var(--sm-ink2);background:transparent;border:1px solid var(--sm-line);
   border-radius:8px;padding:7px 10px;min-height:44px;min-width:44px;cursor:pointer;white-space:nowrap}
 .sm-lang:hover{background:var(--sm-wash);color:var(--sm-ink)}
-.sm-btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:14px;color:var(--sm-ink);
-  background:transparent;border:1px solid var(--sm-line);border-radius:8px;padding:7px 12px;min-height:44px;cursor:pointer}
-.sm-btn:hover{background:var(--sm-wash)}
-.sm-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .sm-bar :focus-visible{outline:3px solid var(--sm-green);outline-offset:2px;border-radius:6px}
-.sm-panel{position:absolute;right:16px;top:calc(100% + 6px);width:min(360px,calc(100vw - 32px));background:var(--sm-surface);
+.sm-panel{position:absolute;left:16px;top:calc(100% + 6px);width:min(360px,calc(100vw - 32px));background:var(--sm-surface);
   border:1px solid var(--sm-line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:8px}
 .sm-panel[hidden]{display:none}
 .sm-panel h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--sm-ink2);margin:6px 10px 6px}
@@ -82,13 +90,15 @@
 .sm-panel a svg{grid-row:span 2;width:22px;height:22px;fill:none;stroke:var(--sm-green);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sm-panel b{font-weight:600}.sm-panel small{color:var(--sm-ink2);font-size:13px}
 .sm-panel a.sm-off{opacity:.6;pointer-events:none}
+.sm-panel a.sm-sub{grid-template-columns:1fr;gap:0;margin-left:44px;padding:7px 10px}
+.sm-panel a.sm-sub b{font-size:14px}
 @media print{.sm-bar{display:none}}`;
 
   const ICON = {
     home: '<path d="M3 11l9-8 9 8M5 10v11h14V10M10 21v-6h4v6"/>',
-    screening: '<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/>',
-    jakarta: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
+    finder: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
     assets: '<path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/>',
+    chev: '<path d="M6 9l6 6 6-6"/>',
   };
   const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -96,24 +106,32 @@
   function render(bar) {
     const t = T[lang()] || T.en;
     const app = assetApp();
-    const item = (k, url, sub, ext) => `<a href="${esc(url || "#")}"${k === section ? ' aria-current="page"' : ""}${url ? "" : ' class="sm-off" aria-disabled="true"'}${ext && url ? ' target="_blank" rel="noopener"' : ""}>${svg(ICON[k])}<b>${t[k]}</b><small>${sub}</small></a>`;
+    const item = (k, url, label, sub, ext) => `<a href="${esc(url || "#")}"${k === section ? ' aria-current="page"' : ""}${url ? "" : ' class="sm-off" aria-disabled="true"'}${ext && url ? ' target="_blank" rel="noopener"' : ""}>${svg(ICON[k])}<b>${label}</b><small>${sub}</small></a>`;
+    // City screening and the Jakarta finder are the two steps of one "Property finder" feature (see
+    // RE-asset's site.* strings, which this mirrors): one umbrella entry, opening at the first step,
+    // with both steps listed underneath as sub-items — not two flat top-level entries.
+    const subItem = (k, url, label, sub) => `<a class="sm-sub" href="${esc(url)}"${k === section ? ' aria-current="page"' : ""}><b>${label}</b><small>${sub}</small></a>`;
+    const hereLabel = section === "screening" || section === "jakarta" ? t.finder : t[section];
     // The language toggle sits in the bar itself, not only inside the collapsed Menu panel: this product
     // is Indonesia-only, so a visitor on an English-locale device needs a visible, one-click EN/ID switch.
     bar.innerHTML = `<div class="sm-in">
-  <a class="sm-brand" href="${LINKS.home}"><span class="sm-mark">${svg(ICON.assets)}</span>${PRODUCT}</a>
-  ${section !== "home" ? `<span class="sm-here">${t[section] || ""}</span>` : ""}
+  <button type="button" class="sm-brand" aria-expanded="false" aria-controls="sm-panel">
+    <span class="sm-mark">${svg(ICON.assets)}</span>${PRODUCT}
+    <svg class="sm-chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICON.chev}</svg>
+  </button>
+  ${section !== "home" ? `<span class="sm-here">${hereLabel || ""}</span>` : ""}
   <button type="button" class="sm-lang" data-lang aria-label="${lang() === "id" ? "Switch to English" : "Ganti ke Bahasa Indonesia"}">${lang() === "id" ? "EN" : "ID"}</button>
-  <button type="button" class="sm-btn" aria-expanded="false" aria-controls="sm-panel">${svg('<path d="M4 7h16M4 12h16M4 17h16"/>')}${t.menu}</button>
   <nav class="sm-panel" id="sm-panel" aria-label="${t.sections}" hidden>
     <h2>${t.sections}</h2>
-    ${item("home", LINKS.home, t.homeSub)}
-    ${item("screening", LINKS.screening, t.screeningSub)}
-    ${item("jakarta", LINKS.jakarta, t.jakartaSub)}
-    ${item("assets", app, app ? t.assetsSub : t.assetsNone, true)}
+    ${item("home", LINKS.home, t.home, t.homeSub)}
+    ${item("finder", LINKS.screening, t.finder, t.finderSub)}
+    ${subItem("screening", LINKS.screening, t.screening, t.screeningSub)}
+    ${subItem("jakarta", LINKS.jakarta, t.jakarta, t.jakartaSub)}
+    ${item("assets", app, t.assets, app ? t.assetsSub : t.assetsNone, true)}
   </nav>
 </div>`;
-    const btn = bar.querySelector(".sm-btn"), panel = bar.querySelector(".sm-panel");
-    const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", String(v)); btn.setAttribute("aria-label", v ? t.close : t.menu); };
+    const btn = bar.querySelector(".sm-brand"), panel = bar.querySelector(".sm-panel");
+    const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", String(v)); };
     btn.onclick = () => { const v = panel.hidden; open(v); if (v) panel.querySelector("a:not(.sm-off)").focus(); };
     bar.querySelector("[data-lang]").onclick = () => {
       put("site-lang", lang() === "id" ? "en" : "id");
@@ -132,7 +150,7 @@
     document.addEventListener("click", e => {
       const p = bar.querySelector(".sm-panel");
       // isConnected: the language switch redraws the bar, so its own click lands on a removed node
-      if (!p.hidden && e.target.isConnected && !bar.contains(e.target)) { p.hidden = true; bar.querySelector(".sm-btn").setAttribute("aria-expanded", "false"); }
+      if (!p.hidden && e.target.isConnected && !bar.contains(e.target)) { p.hidden = true; bar.querySelector(".sm-brand").setAttribute("aria-expanded", "false"); }
     });
     if (section !== "home") put("site-last", section);
   }
