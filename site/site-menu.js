@@ -8,7 +8,7 @@
    bar on the server (RE-asset app/templates/base.html), with the same look.
 
    Use: <script src="site-menu.js" data-section="screening" defer></script>
-   data-section is one of: home, screening, jakarta.
+   data-section is one of: home, screening, jakarta (the Property finder, still published at /RE-jkt/).
 */
 (function () {
   "use strict";
@@ -21,12 +21,12 @@
   const T = {
     en: { menu: "Menu", close: "Close menu", sections: "Sections", home: "Home", homeSub: "Start page",
       screening: "City screening", screeningSub: "Which Indonesian city to invest in",
-      jakarta: "Jakarta finder", jakartaSub: "Which property in Jakarta to visit",
+      jakarta: "Property finder", jakartaSub: "Which property to visit, city by city",
       assets: "My assets", assetsSub: "Rent, bills and documents (sign in)", assetsNone: "Link appears once the asset app is hosted",
       lang: "Bahasa Indonesia" },
     id: { menu: "Menu", close: "Tutup menu", sections: "Bagian", home: "Beranda", homeSub: "Halaman awal",
       screening: "Penyaringan kota", screeningSub: "Kota mana di Indonesia untuk investasi",
-      jakarta: "Pencari Jakarta", jakartaSub: "Properti mana di Jakarta untuk disurvei",
+      jakarta: "Pencari properti", jakartaSub: "Properti mana yang layak disurvei, per kota",
       assets: "Aset saya", assetsSub: "Sewa, tagihan dan dokumen (masuk)", assetsNone: "Tautan muncul setelah aplikasi aset di-hosting",
       lang: "English" },
   };
