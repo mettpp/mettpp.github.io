@@ -48,11 +48,14 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
 .start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
 @media (prefers-color-scheme: dark) { .start-badge { color:#0d1311; } }
 .start-badge[hidden] { display:none; }
-.tool-wrap { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.tool-wrap .tool { flex:1; }
-.soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
-.notify { font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; padding:0 2px; }
+/* The notify link is a sibling of .tool (an <a> can't nest another <a>), positioned so it never steals
+   height from .tool-wrap's grid cell — otherwise .tool would be shorter than the other two cards and its
+   bottom row (the "Coming soon" badge) would land higher than their "Open →" baseline. */
+.tool-wrap { position:relative; min-width:0; }
+.tool-wrap .tool { height:100%; }
+.notify { position:absolute; top:100%; left:2px; margin-top:8px; font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; }
 .notify[hidden] { display:none; }
+.soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
 footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
 footer p { margin:0 0 6px; max-width:90ch; }
 </style>
@@ -90,7 +93,7 @@ footer p { margin:0 0 6px; max-width:90ch; }
       <a class="tool" id="t-assets" href="#">
         <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="s3">3 · Run</span></span>
         <h2 data-t="assets">My assets</h2>
-        <p data-t="assetsLead">Rent, deposits, utility bills and taxes, documents and finance for your portfolio, for you and your managers, collectors and accountant. Needs a sign-in.</p>
+        <p data-t="assetsLead">Rent, deposits, utility bills and taxes, documents and finance for your portfolio, for you and your managers, collectors and accountant.</p>
         <div class="live" id="live-assets"></div>
         <span class="soon" id="assets-soon" data-t="comingSoon" hidden>Coming soon</span>
         <span class="go" id="assets-go" data-t="signIn">Sign in →</span>
@@ -121,18 +124,20 @@ footer p { margin:0 0 6px; max-width:90ch; }
       screeningLead: "27 lokasi di Indonesia diperingkat untuk bangun dan jual, beli untuk dijual atau beli untuk disewakan, dari pertumbuhan harga, imbal hasil, permintaan, likuiditas dan bencana, disesuaikan setiap hari dengan berita.",
       jakartaLead: "Muat listing atau kavling yang Anda incar dan peringkatkan masing-masing untuk disewakan, dijual kembali atau dibangun ulang, dengan cek banjir, transportasi, sertifikat dan harga.",
       jakartaLive: "Daftar properti Anda hanya tersimpan di peramban ini.",
-      assetsLead: "Sewa, deposit, tagihan listrik, air dan pajak, dokumen serta keuangan portofolio, untuk Anda, manajer, penagih dan akuntan. Perlu masuk.",
+      assetsLead: "Sewa, deposit, tagihan listrik, air dan pajak, dokumen serta keuangan portofolio, untuk Anda, manajer, penagih dan akuntan.",
       loading: "Memuat peringkat hari ini…", open: "Buka →", signIn: "Masuk →",
       top: "Teratas hari ini, seimbang", updated: "Diperbarui",
       noScores: "Peringkat terbaru ada di dalam.", feedCount: n => `${n} aset di peta`, feedCities: "Kota",
       noApp: "Tautan muncul setelah aplikasi aset di-hosting.", noFeed: "Hubungkan aset Anda ke peta lewat Pengaturan > Shared feed di aplikasi aset.",
+      feedError: "Tidak bisa menjangkau feed Anda — periksa tautannya di Pengaturan > Shared feed.",
       foot1: "Alat penyaringan ini untuk memutuskan di mana melihat lebih dekat, bukan nasihat investasi, hukum atau teknik: periksa sertifikat lewat notaris/PPAT, survei lokasi dan risikonya sebelum membeli.",
       foot2: "Pin dan batas aset Anda sampai ke peta lewat shared feed aplikasi aset, yang hanya berisi nama, jenis, kota, pin dan batas. Harga, sewa dan penyewa tetap di balik login aplikasi aset.",
     },
   };
   const EN = { resume: "Continue to", top: "Top today, balanced", updated: "Updated", noScores: "The latest ranking is inside.",
     feedCount: n => `${n} assets on the maps`, feedCities: "Cities", noApp: "The link appears here once the asset app is hosted.",
-    noFeed: "Connect your assets to the maps under Settings > Shared feed in the asset app." };
+    noFeed: "Connect your assets to the maps under Settings > Shared feed in the asset app.",
+    feedError: "Couldn't reach your feed — check the link under Settings > Shared feed." };
   const tr = k => { const l = M ? M.lang() : "en"; const v = (T[l] || {})[k]; return v !== undefined ? v : EN[k]; };
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -165,6 +170,7 @@ footer p { margin:0 0 6px; max-width:90ch; }
     else { assets.removeAttribute("href"); assets.setAttribute("aria-disabled", "true"); $("#assets-go").hidden = true; $("#assets-soon").hidden = false; $("#assets-notify").hidden = false; }
     $("#live-assets").innerHTML = !app ? `<span class="k">${esc(tr("noApp"))}</span>`
       : feed ? `<b>${esc(tr("feedCount")(feed.n))}</b><br><span class="k">${esc(tr("feedCities"))}: ${esc(feed.cities.join(", "))}</span>`
+      : feed === false ? `<span class="k">${esc(tr("feedError"))}</span>`
       : `<span class="k">${esc(tr("noFeed"))}</span>`;
 
     const box = $("#live-screening");
@@ -197,11 +203,11 @@ footer p { margin:0 0 6px; max-width:90ch; }
     try { link = localStorage.getItem("shared-feed-link") || ""; } catch (e) { return; }
     if (!link) return;
     fetch(link, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(d => {
-      if (!d || !Array.isArray(d.features)) return;
+      if (!d || !Array.isArray(d.features)) { feed = false; return paint(); }
       const cities = [...new Set(d.features.map(f => f.properties && f.properties.city).filter(Boolean))].sort();
       feed = { n: d.features.length, cities: cities.slice(0, 6).concat(cities.length > 6 ? ["…"] : []) };
       paint();
-    }).catch(() => {});
+    }).catch(() => { feed = false; paint(); });
   }
 
   document.addEventListener("site-lang", paint);
