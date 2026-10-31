@@ -65,10 +65,10 @@
 .sm-here{color:var(--sm-ink2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .sm-here::before{content:"/";margin-right:10px;color:var(--sm-line)}
 .sm-lang{margin-left:auto;font:inherit;font-weight:600;font-size:13px;color:var(--sm-ink2);background:transparent;border:1px solid var(--sm-line);
-  border-radius:8px;padding:7px 10px;min-height:38px;cursor:pointer;white-space:nowrap}
+  border-radius:8px;padding:7px 10px;min-height:44px;min-width:44px;cursor:pointer;white-space:nowrap}
 .sm-lang:hover{background:var(--sm-wash);color:var(--sm-ink)}
 .sm-btn{display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;font-size:14px;color:var(--sm-ink);
-  background:transparent;border:1px solid var(--sm-line);border-radius:8px;padding:7px 12px;min-height:38px;cursor:pointer}
+  background:transparent;border:1px solid var(--sm-line);border-radius:8px;padding:7px 12px;min-height:44px;cursor:pointer}
 .sm-btn:hover{background:var(--sm-wash)}
 .sm-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .sm-bar :focus-visible{outline:3px solid var(--sm-green);outline-offset:2px;border-radius:6px}
@@ -102,7 +102,7 @@
     bar.innerHTML = `<div class="sm-in">
   <a class="sm-brand" href="${LINKS.home}"><span class="sm-mark">${svg(ICON.assets)}</span>${PRODUCT}</a>
   ${section !== "home" ? `<span class="sm-here">${t[section] || ""}</span>` : ""}
-  <button type="button" class="sm-lang" data-lang>${lang() === "id" ? "EN" : "ID"}</button>
+  <button type="button" class="sm-lang" data-lang aria-label="${lang() === "id" ? "Switch to English" : "Ganti ke Bahasa Indonesia"}">${lang() === "id" ? "EN" : "ID"}</button>
   <button type="button" class="sm-btn" aria-expanded="false" aria-controls="sm-panel">${svg('<path d="M4 7h16M4 12h16M4 17h16"/>')}${t.menu}</button>
   <nav class="sm-panel" id="sm-panel" aria-label="${t.sections}" hidden>
     <h2>${t.sections}</h2>
