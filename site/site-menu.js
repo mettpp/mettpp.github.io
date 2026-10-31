@@ -129,7 +129,8 @@
     render(bar);
     document.addEventListener("click", e => {
       const p = bar.querySelector(".sm-panel");
-      if (!p.hidden && !bar.contains(e.target)) { p.hidden = true; bar.querySelector(".sm-btn").setAttribute("aria-expanded", "false"); }
+      // isConnected: the language switch redraws the bar, so its own click lands on a removed node
+      if (!p.hidden && e.target.isConnected && !bar.contains(e.target)) { p.hidden = true; bar.querySelector(".sm-btn").setAttribute("aria-expanded", "false"); }
     });
     if (section !== "home") put("site-last", section);
   }
