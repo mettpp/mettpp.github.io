@@ -10,6 +10,11 @@
 
    Use: <script src="site-menu.js" data-section="screening" defer></script>
    data-section is one of: home, screening, jakarta.
+
+   City screening and the per-city finder are one section, the Property finder: screening (published at
+   /RE-screening/) is its overview, "1 · Cities", and the finder (published at /RE-jkt/) its drill-down,
+   "2 · Properties". The Menu lists the section once, and both pages get a quick-switch tabs row under
+   the bar so you don't have to reopen the Menu just to move between the two steps.
 */
 (function () {
   "use strict";
@@ -26,13 +31,13 @@
     en: { menu: "Menu", close: "Close menu", sections: "Sections", home: "Home", homeSub: "Start page",
       finder: "Property finder", finderSub: "Compare cities, then rank the properties in one",
       screening: "1 · Cities", screeningSub: "Which Indonesian city to invest in",
-      jakarta: "2 · Properties", jakartaSub: "Which property to visit there",
+      jakarta: "2 · Properties", jakartaSub: "Which property to visit there", tabs: "Property finder steps",
       assets: "My assets", assetsSub: "Rent, bills and documents (sign in)", assetsNone: "Link appears once the asset app is hosted",
       lang: "Bahasa Indonesia" },
     id: { menu: "Menu", close: "Tutup menu", sections: "Bagian", home: "Beranda", homeSub: "Halaman awal",
       finder: "Pencari properti", finderSub: "Bandingkan kota, lalu peringkatkan properti di sana",
       screening: "1 · Kota", screeningSub: "Kota mana di Indonesia untuk investasi",
-      jakarta: "2 · Properti", jakartaSub: "Properti mana yang layak disurvei di sana",
+      jakarta: "2 · Properti", jakartaSub: "Properti mana yang layak disurvei di sana", tabs: "Langkah pencari properti",
       assets: "Aset saya", assetsSub: "Sewa, tagihan dan dokumen (masuk)", assetsNone: "Tautan muncul setelah aplikasi aset di-hosting",
       lang: "English" },
   };
@@ -86,12 +91,20 @@
 .sm-panel h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--sm-ink2);margin:6px 10px 6px}
 .sm-panel a{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;padding:10px;border-radius:8px;color:var(--sm-ink);text-decoration:none}
 .sm-panel a:hover{background:var(--sm-wash)}
-.sm-panel a[aria-current=page]{background:var(--sm-wash);box-shadow:inset 3px 0 0 var(--sm-green)}
+.sm-panel a[aria-current]{background:var(--sm-wash);box-shadow:inset 3px 0 0 var(--sm-green)}
 .sm-panel a svg{grid-row:span 2;width:22px;height:22px;fill:none;stroke:var(--sm-green);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .sm-panel b{font-weight:600}.sm-panel small{color:var(--sm-ink2);font-size:13px}
 .sm-panel a.sm-off{opacity:.6;pointer-events:none}
 .sm-panel a.sm-sub{grid-template-columns:1fr;gap:0;margin-left:44px;padding:7px 10px}
 .sm-panel a.sm-sub b{font-size:14px}
+.sm-tabs{max-width:1400px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+.sm-tabs a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;color:var(--sm-ink2);font-weight:600;font-size:14px;
+  text-decoration:none;white-space:nowrap;border-bottom:3px solid transparent}
+.sm-tabs a:hover{color:var(--sm-ink);background:var(--sm-wash)}
+.sm-tabs a[aria-current=page]{color:var(--sm-ink);border-bottom-color:var(--sm-green)}
+.sm-tabs small{font-weight:400;color:var(--sm-ink2)}
+@media (max-width:640px){.sm-tabs small{display:none}}
+@media (max-width:480px){.sm-here{display:none}}
 @media print{.sm-bar{display:none}}`;
 
   const ICON = {
@@ -103,6 +116,8 @@
   const svg = p => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`;
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+  const inFinder = section === "screening" || section === "jakarta";
+
   function render(bar) {
     const t = T[lang()] || T.en;
     const app = assetApp();
@@ -111,7 +126,10 @@
     // RE-asset's site.* strings, which this mirrors): one umbrella entry, opening at the first step,
     // with both steps listed underneath as sub-items — not two flat top-level entries.
     const subItem = (k, url, label, sub) => `<a class="sm-sub" href="${esc(url)}"${k === section ? ' aria-current="page"' : ""}><b>${label}</b><small>${sub}</small></a>`;
-    const hereLabel = section === "screening" || section === "jakarta" ? t.finder : t[section];
+    // On either Property finder page, a quick-switch tabs row under the bar moves between the two
+    // steps without reopening the Menu for it every time.
+    const tab = k => `<a href="${esc(LINKS[k])}"${k === section ? ' aria-current="page"' : ""}>${t[k]} <small>${t[k + "Sub"]}</small></a>`;
+    const hereLabel = inFinder ? t.finder : t[section];
     // The language toggle sits in the bar itself, not only inside the collapsed Menu panel: this product
     // is Indonesia-only, so a visitor on an English-locale device needs a visible, one-click EN/ID switch.
     bar.innerHTML = `<div class="sm-in">
@@ -129,7 +147,7 @@
     ${subItem("jakarta", LINKS.jakarta, t.jakarta, t.jakartaSub)}
     ${item("assets", app, t.assets, app ? t.assetsSub : t.assetsNone, true)}
   </nav>
-</div>`;
+</div>${inFinder ? `<nav class="sm-tabs" aria-label="${t.tabs}">${tab("screening")}${tab("jakarta")}</nav>` : ""}`;
     const btn = bar.querySelector(".sm-brand"), panel = bar.querySelector(".sm-panel");
     const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", String(v)); };
     btn.onclick = () => { const v = panel.hidden; open(v); if (v) panel.querySelector("a:not(.sm-off)").focus(); };

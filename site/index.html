@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Property Portfolio</title>
-<meta name="description" content="Screen Indonesian cities, find a property in Jakarta, and run the assets you own.">
+<meta name="description" content="Screen Indonesian cities, find a property worth visiting in them, and run the assets you own.">
 <style>
 /* Home: one big start page for the three tools. Same paper, ink and green as the asset app. */
 :root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --on-green:#fff; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light; }
@@ -24,7 +24,13 @@ a { color:var(--green-dark); text-underline-offset:2px; }
 .btn { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:var(--on-green); border-radius:8px; padding:12px 18px; font-weight:600; text-decoration:none; }
 .btn:hover { background:var(--green-dark); color:var(--on-green); }
 .resume small { color:var(--ink-2); }
-.tools { display:grid; gap:16px; grid-template-columns:repeat(3, minmax(0, 1fr)); padding-bottom:48px; }
+.tools { display:grid; gap:16px; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr); padding-bottom:48px; }
+.parts { display:grid; gap:12px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:auto; }
+@media (max-width:600px) { .parts { grid-template-columns:1fr; } }
+.part { display:flex; flex-direction:column; gap:6px; border:1px solid var(--line); border-radius:10px; padding:16px; text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s; }
+.part:hover { border-color:var(--green); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+.part > b { font-size:17px; }
+.part .live { margin-top:auto; }
 @media (max-width:900px) { .tools { grid-template-columns:1fr; } .hero { padding:44px 0 28px; } }
 .tool { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:12px; min-width:0; text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; }
 a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 24px rgba(0,0,0,.08); }
@@ -39,11 +45,10 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
 .live li { font-variant-numeric:tabular-nums; }
 .live .k { color:var(--ink-2); font-size:13px; }
 .go { font-weight:600; color:var(--green-dark); }
-.tool.jkt .step svg { stroke:var(--blue); }
-/* Default-visitor emphasis: when nobody has a section to resume to, City screening reads as the entry point
-   the product's own "1 · Where / 2 · Which / 3 · Run" sequence implies, instead of three equal-weight choices. */
-.tools.lead-screening .tool#t-screening { border-color:var(--green); box-shadow:0 1px 0 var(--green) inset; }
-@media (min-width:901px) { .tools.lead-screening .tool#t-screening { padding:28px; } .tools.lead-screening .tool:not(#t-screening) { opacity:.88; } }
+/* Default-visitor emphasis: when nobody has a section to resume to, the Property finder reads as the entry point
+   the product's own "1 · Find / 2 · Run" sequence implies. */
+.tools.lead-screening .tool#t-finder { border-color:var(--green); box-shadow:0 1px 0 var(--green) inset; }
+@media (min-width:901px) { .tools.lead-screening .tool#t-finder { padding:28px; } .tools.lead-screening .tool:not(#t-finder) { opacity:.88; } }
 .start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:var(--on-green); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
 .start-badge[hidden] { display:none; }
 /* The notify link is a sibling of .tool (an <a> can't nest another <a>), positioned so it never steals
@@ -65,7 +70,7 @@ footer p { margin:0 0 6px; max-width:90ch; }
 <main class="wrap">
   <section class="hero">
     <h1 data-t="title">Find it, check it, run it.</h1>
-    <p data-t="lead">Screen Indonesian cities for where to invest, find the property in Jakarta worth a site visit, and keep the rent, bills and papers of what you own in one place.</p>
+    <p data-t="lead">Find where to invest in Indonesia, city first and then the property worth a site visit, and keep the rent, bills and papers of what you own in one place.</p>
     <p class="reassure"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/></svg><span data-t="reassure">Screening only, not investment or legal advice — always verify with a notary/PPAT before buying.</span></p>
     <div class="resume" id="resume" hidden>
       <a class="btn" id="resume-link" href="#"></a>
@@ -74,24 +79,29 @@ footer p { margin:0 0 6px; max-width:90ch; }
   </section>
 
   <section class="tools" id="tools" aria-label="Sections">
-    <a class="tool" id="t-screening" href="#">
+    <div class="tool finder" id="t-finder">
       <span class="start-badge" id="start-badge" data-t="startHere" hidden>Start here</span>
-      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/></svg><span data-t="s1">1 · Where</span></span>
-      <h2 data-t="screening">City screening</h2>
-      <p data-t="screeningLead">27 Indonesian locations ranked for develop-and-sell, buy-to-sell or buy-to-rent. Scored on price growth, yields, demand, liquidity and hazards, nudged daily by the news.</p>
-      <div class="live" id="live-screening"><span class="k" data-t="loading">Loading today's ranking…</span></div>
-      <span class="go" data-t="open">Open →</span>
-    </a>
-    <a class="tool jkt" id="t-jakarta" href="#">
-      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span data-t="s2">2 · Which</span></span>
-      <h2 data-t="jakarta">Jakarta finder</h2>
-      <p data-t="jakartaLead">Load the listings or plots you are looking at and rank each one for buy to rent, buy to sell or redevelopment, with flood, transit, certificate and price checks.</p>
-      <div class="live"><span class="k" data-t="jakartaLive">Your property lists stay in your browser only.</span></div>
-      <span class="go" data-t="open">Open →</span>
-    </a>
+      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span data-t="s1">1 · Find</span></span>
+      <h2 data-t="finder">Property finder</h2>
+      <p data-t="finderLead">Start from 27 Indonesian locations ranked for develop-and-sell, buy-to-sell or buy-to-rent, then open a city and rank the listings or plots you are looking at there, with flood, transit, certificate and price checks.</p>
+      <div class="parts">
+        <a class="part" id="t-screening" href="#">
+          <b data-t="screening">1 · Cities</b>
+          <span class="k" data-t="screeningLead">Scored on price growth, yields, demand, liquidity and hazards, nudged daily by the news.</span>
+          <div class="live" id="live-screening"><span class="k" data-t="loading">Loading today's ranking…</span></div>
+          <span class="go" data-t="openCities">Compare cities →</span>
+        </a>
+        <a class="part" id="t-jakarta" href="#">
+          <b data-t="jakarta">2 · Properties</b>
+          <span class="k" data-t="jakartaLead">Jakarta and the other top cities, each property ranked for buy to rent, buy to sell or redevelopment.</span>
+          <div class="live"><span class="k" data-t="jakartaLive">Your property lists stay in your browser only.</span></div>
+          <span class="go" data-t="openProps">Rank properties →</span>
+        </a>
+      </div>
+    </div>
     <div class="tool-wrap">
       <a class="tool" id="t-assets" href="#">
-        <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="s3">3 · Run</span></span>
+        <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="s3">2 · Run</span></span>
         <h2 data-t="assets">My assets</h2>
         <p data-t="assetsLead">Rent, deposits, utility bills and taxes, documents and finance for your portfolio, for you and your managers, collectors and accountant.</p>
         <div class="live" id="live-assets"></div>
@@ -115,14 +125,17 @@ footer p { margin:0 0 6px; max-width:90ch; }
     en: {},
     id: {
       title: "Temukan, periksa, kelola.",
-      lead: "Saring kota di Indonesia untuk investasi, temukan properti di Jakarta yang layak disurvei, dan simpan sewa, tagihan serta dokumen aset Anda di satu tempat.",
+      lead: "Temukan tempat investasi di Indonesia, kotanya dulu lalu properti yang layak disurvei, dan simpan sewa, tagihan serta dokumen aset Anda di satu tempat.",
       resumeNote: "Anda bisa pindah kapan saja lewat tombol Menu di atas.", resume: "Lanjut ke",
       reassure: "Hanya penyaringan, bukan nasihat investasi atau hukum — selalu periksa lewat notaris/PPAT sebelum membeli.",
       startHere: "Mulai di sini", comingSoon: "Segera hadir", notifyMe: "Pantau progres hosting di GitHub →",
-      s1: "1 · Di mana", s2: "2 · Yang mana", s3: "3 · Kelola",
-      screening: "Penyaringan kota", jakarta: "Pencari Jakarta", assets: "Aset saya",
-      screeningLead: "27 lokasi di Indonesia diperingkat untuk bangun-dan-jual, beli-untuk-dijual atau beli-untuk-disewakan. Dinilai dari pertumbuhan harga, imbal hasil, permintaan, likuiditas dan bencana, disesuaikan setiap hari dengan berita.",
-      jakartaLead: "Muat listing atau kavling yang Anda incar dan peringkatkan masing-masing untuk disewakan, dijual kembali atau dibangun ulang, dengan cek banjir, transportasi, sertifikat dan harga.",
+      s1: "1 · Temukan", s3: "2 · Kelola",
+      finder: "Pencari properti", screening: "1 · Kota", jakarta: "2 · Properti", assets: "Aset saya",
+      finderLead: "Mulai dari 27 lokasi di Indonesia yang diperingkat untuk bangun-dan-jual, beli-untuk-dijual atau beli-untuk-disewakan, lalu buka satu kota dan peringkatkan listing atau kavling yang Anda incar di sana, dengan cek banjir, transportasi, sertifikat dan harga.",
+      openCities: "Bandingkan kota →", openProps: "Peringkatkan properti →",
+      lastScreening: "Pencari properti: kota", lastJakarta: "Pencari properti: properti",
+      screeningLead: "Dinilai dari pertumbuhan harga, imbal hasil, permintaan, likuiditas dan bencana, disesuaikan setiap hari dengan berita.",
+      jakartaLead: "Jakarta dan kota teratas lainnya, tiap properti diperingkat untuk disewakan, dijual kembali atau dibangun ulang.",
       jakartaLive: "Daftar properti Anda hanya tersimpan di peramban ini.",
       assetsLead: "Sewa, deposit, tagihan listrik, air dan pajak, dokumen serta keuangan portofolio, untuk Anda, manajer, penagih dan akuntan.",
       loading: "Memuat peringkat hari ini…", open: "Buka →", signIn: "Masuk →", checkLink: "Periksa tautan →",
@@ -134,7 +147,7 @@ footer p { margin:0 0 6px; max-width:90ch; }
       foot2: "Pin dan batas aset Anda sampai ke peta lewat shared feed aplikasi aset, yang hanya berisi nama, jenis, kota, pin dan batas. Harga, sewa dan penyewa tetap di balik login aplikasi aset.",
     },
   };
-  const EN = { resume: "Continue to", top: "Top today, balanced", updated: "Updated", noScores: "The latest ranking is inside.",
+  const EN = { lastScreening: "Property finder: cities", lastJakarta: "Property finder: properties", resume: "Continue to", top: "Top today, balanced", updated: "Updated", noScores: "The latest ranking is inside.",
     feedCount: n => `${n} assets on the maps`, feedCities: "Cities", noApp: "The link appears here once the asset app is hosted.",
     noFeed: "Connect your assets to the maps under Settings > Shared feed in the asset app.",
     feedError: "Couldn't reach your feed — check the link under Settings > Shared feed.", checkLink: "Check your link →", signIn: "Sign in →" };
@@ -158,10 +171,10 @@ footer p { margin:0 0 6px; max-width:90ch; }
     const last = (() => { try { return localStorage.getItem("site-last"); } catch (e) { return null; } })();
     const app = M ? M.assetApp() : "";
     const target = { screening: links.screening, jakarta: links.jakarta, assets: app }[last];
-    if (target) { $("#resume").hidden = false; $("#resume-link").href = target; $("#resume-link").textContent = `${tr("resume")} ${tr(last) || EN_TEXT[last]} →`; }
+    if (target) { $("#resume").hidden = false; $("#resume-link").href = target; $("#resume-link").textContent = `${tr("resume")} ${tr({ screening: "lastScreening", jakarta: "lastJakarta" }[last]) || tr(last) || EN_TEXT[last]} →`; }
 
-    // First-time visitors (no section to resume to) get City screening emphasised as the entry point the
-    // product's own "1 · Where / 2 · Which / 3 · Run" sequence implies, instead of three equal-weight cards.
+    // First-time visitors (no section to resume to) get the Property finder emphasised as the entry point the
+    // product's own "1 · Find / 2 · Run" sequence implies.
     $("#tools").classList.toggle("lead-screening", !target);
     $("#start-badge").hidden = !!target;
 
