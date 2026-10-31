@@ -1,5 +1,5 @@
 """Preview the whole site locally, the way GitHub Pages serves it: one address with the home page at /,
-City screening at /RE-screening/ and the Jakarta finder at /RE-jkt/.
+and the Property finder: its city overview at /RE-screening/ and its per-city property ranking at /RE-jkt/.
 
     python serve.py              # http://localhost:8000
     python serve.py 8080         # another port

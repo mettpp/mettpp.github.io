@@ -5,11 +5,11 @@ The start page and the shared **Menu** that make the property tools one product:
 | Section | What it is | Lives in | Address |
 |---|---|---|---|
 | Home | Big start page: what each tool is for, today's top cities, your asset count | this repo | `https://mettpp.github.io/` |
-| City screening | Which Indonesian city to invest in | [RE-screening](https://github.com/mettpp/RE-screening) | `https://mettpp.github.io/RE-screening/` |
-| Property finder | Which property to visit, city by city (Jakarta and the other top cities from City screening) | [RE-jkt](https://github.com/mettpp/RE-jkt) | `https://mettpp.github.io/RE-jkt/` (the address stays the same) |
+| Property finder, 1 · Cities | The overview: which Indonesian city to invest in (formerly City screening) | [RE-screening](https://github.com/mettpp/RE-screening) | `https://mettpp.github.io/RE-screening/` |
+| Property finder, 2 · Properties | The drill-down: which property to visit in a city (Jakarta and the other top cities) | [RE-jkt](https://github.com/mettpp/RE-jkt) | `https://mettpp.github.io/RE-jkt/` |
 | My assets | Rent, bills, documents, finance (logins, database) | [RE-asset](https://github.com/mettpp/RE-asset) | its own server, e.g. `https://assets.example.com/` |
 
-Every page has the same slim bar at the top: the product name (back to the home page), the section you are in, and a collapsed **Menu** button that lists the four sections. People rarely switch once they have picked one, so the list stays closed until asked for. The home page remembers the last section you used and offers **Continue to …**. The menu has an English / Bahasa Indonesia switch, remembered per browser.
+Every page has the same slim bar at the top: the product name (back to the home page), the section you are in, and a collapsed **Menu** button that lists the three sections. City screening and the finder are one section, the Property finder, in two steps: both pages show the same **1 · Cities / 2 · Properties** tabs under the bar, and the Menu lists the section once with the two steps under it. They stay two repos with their own data pipelines. People rarely switch once they have picked one, so the list stays closed until asked for. The home page remembers the last section you used and offers **Continue to …**. The menu has an English / Bahasa Indonesia switch, remembered per browser.
 
 ## How the pieces are hosted
 
