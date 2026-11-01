@@ -7,14 +7,28 @@
 <meta name="description" content="Screen Indonesian cities, find a property worth visiting in them, and run the assets you own.">
 <style>
 /* Home: one big start page for the three tools. Same paper, ink and green as the asset app. */
-:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --on-green:#fff; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light; }
-@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --on-green:#0d1311; --wash:#203029; --blue:#6cb6e0; color-scheme:dark; } }
+:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --on-green:#fff; --wash:#e8f1ec; --blue:#0f5f8c; color-scheme:light;
+  /* A tighter contact shadow plus a soft, low ambient one, in the ink hue rather than plain black — same
+     token as the asset app's floating panels, so a card here and a card there read as one material. */
+  --float-shadow: 0 1px 2px rgba(27, 31, 28, .06), 0 10px 24px -8px rgba(27, 31, 28, .18);
+  --float-shadow-hover: 0 2px 4px rgba(27, 31, 28, .08), 0 16px 32px -10px rgba(27, 31, 28, .24); }
+@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --on-green:#0d1311; --wash:#203029; --blue:#6cb6e0; color-scheme:dark;
+  --float-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 28px -8px rgba(0, 0, 0, .55);
+  --float-shadow-hover: 0 2px 4px rgba(0, 0, 0, .35), 0 20px 40px -10px rgba(0, 0, 0, .65); } }
 * { box-sizing:border-box; }
-body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; accent-color:var(--green); }
+/* A faint paper grain under the flat --paper fill — the one material cue "paper, ink, green" promises
+   but a solid colour alone can't give. Generated once as an SVG noise filter, not a photo asset, so it
+   stays crisp at any size and costs nothing to fetch. Kept very low-contrast: felt, not seen. */
+body { margin:0; background-color:var(--paper);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; accent-color:var(--green); }
 a { color:var(--green-dark); text-underline-offset:2px; }
 :focus-visible { outline:3px solid var(--green); outline-offset:2px; border-radius:4px; }
 .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
-.hero { padding:72px 0 40px; }
+/* Horizontal inset matches .tool's own padding (24px) below — without it, the hero and footer text sit
+   flush against the page gutter while every card's text is inset an extra 24px by its own padding, so
+   scanning down the left margin the edge steps in and out instead of running straight. */
+.hero { padding:72px 24px 48px; }
 .hero h1 { font-size:clamp(36px, 6vw, 64px); line-height:1.05; letter-spacing:-.03em; margin:0 0 16px; max-width:16ch; }
 .hero p { font-size:clamp(17px, 2vw, 21px); color:var(--ink-2); margin:0; max-width:52ch; }
 .reassure { margin:14px 0 0; font-size:13px; color:var(--ink-2); display:flex; gap:6px; align-items:flex-start; max-width:52ch; }
@@ -27,17 +41,20 @@ a { color:var(--green-dark); text-underline-offset:2px; }
 .tools { display:grid; gap:16px; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr); padding-bottom:48px; }
 .parts { display:grid; gap:12px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:auto; }
 @media (max-width:600px) { .parts { grid-template-columns:1fr; } }
-.part { display:flex; flex-direction:column; gap:6px; border:1px solid var(--line); border-radius:10px; padding:16px; text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s; }
-.part:hover { border-color:var(--green); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+.part { display:flex; flex-direction:column; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; text-decoration:none; color:var(--ink);
+  box-shadow:var(--float-shadow); transition:border-color .15s, box-shadow .15s, transform .15s; }
+.part:hover { border-color:var(--green); box-shadow:var(--float-shadow-hover); transform:translateY(-1px); }
 .part > b { font-size:17px; }
 .part .live { margin-top:auto; }
 @media (max-width:900px) { .tools { grid-template-columns:1fr; } .hero { padding:44px 0 28px; } }
-.tool { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:12px; min-width:0; text-decoration:none; color:var(--ink); transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; }
-a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 24px rgba(0,0,0,.08); }
+.tool { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:12px; min-width:0; text-decoration:none; color:var(--ink);
+  box-shadow:var(--float-shadow); transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; }
+a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:var(--float-shadow-hover); transform:translateY(-1px); }
 .tool[aria-disabled] { cursor:default; }
 .tool[aria-disabled] h2 { color:var(--ink-2); }
 .step { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:flex; gap:10px; align-items:center; }
-.step svg { width:26px; height:26px; fill:none; stroke:var(--green); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.step svg { width:16px; height:16px; padding:7px; box-sizing:content-box; background:var(--wash); border-radius:999px; fill:none; stroke:var(--green); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.tools.lead-screening .tool#t-finder .step svg { background:var(--surface); }
 .tool h2 { margin:0; font-size:26px; letter-spacing:-.02em; line-height:1.15; }
 .tool p { margin:0; color:var(--ink-2); }
 .live { margin-top:auto; border-top:1px solid var(--line); padding-top:12px; font-size:14px; min-height:96px; }
@@ -47,7 +64,9 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
 .go { font-weight:600; color:var(--green-dark); }
 /* Default-visitor emphasis: when nobody has a section to resume to, the Property finder reads as the entry point
    the product's own "1 · Find / 2 · Run" sequence implies. */
-.tools.lead-screening .tool#t-finder { border-color:var(--green); box-shadow:0 1px 0 var(--green) inset; }
+/* The lead card gets a warm wash, not just a border swap — a colour change alone reads as a state
+   toggle; a tint reads as "this one's considered the start," which is what the emphasis means here. */
+.tools.lead-screening .tool#t-finder { background:var(--wash); border-color:var(--green); }
 @media (min-width:901px) { .tools.lead-screening .tool#t-finder { padding:28px; } .tools.lead-screening .tool:not(#t-finder) { opacity:.88; } }
 .start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:var(--on-green); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
 .start-badge[hidden] { display:none; }
@@ -61,7 +80,7 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:0 6px 
 .soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
 .soon[hidden] { display:none; }
 footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
-footer p { margin:0 0 6px; max-width:90ch; }
+footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
 </style>
 </head>
 <body>

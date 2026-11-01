@@ -88,7 +88,12 @@
   border-radius:8px;padding:7px 10px;min-height:44px;min-width:44px;cursor:pointer;white-space:nowrap}
 .sm-lang:hover{background:var(--sm-wash);color:var(--sm-ink)}
 .sm-bar :focus-visible{outline:3px solid var(--sm-green);outline-offset:2px;border-radius:6px}
-.sm-panel{position:absolute;left:16px;top:calc(100% + 6px);width:min(360px,calc(100vw - 32px));background:var(--sm-surface);
+/* position:fixed, placed by JS from the button's own getBoundingClientRect() (see reposition() in
+   render()) rather than a static left:16px here. A static value is only ever right by coincidence —
+   it assumes the button sits exactly at the bar's own left padding, which breaks the moment the bar
+   centers inside max-width:1400px on a wide viewport, or the page is scrolled: the panel then opens
+   "at the side" of the screen instead of under the button that opened it. */
+.sm-panel{position:fixed;width:min(360px,calc(100vw - 32px));background:var(--sm-surface);
   border:1px solid var(--sm-line);border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:8px}
 .sm-panel[hidden]{display:none}
 .sm-panel h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--sm-ink2);margin:6px 10px 6px}
@@ -152,8 +157,20 @@
   </nav>
 </div>${inFinder ? `<nav class="sm-tabs" aria-label="${t.tabs}">${tab("screening")}${tab("jakarta")}</nav>` : ""}`;
     const btn = bar.querySelector(".sm-brand"), panel = bar.querySelector(".sm-panel");
-    const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", String(v)); };
+    // Place the panel from the button's actual on-screen position every time it opens, and keep it
+    // there while open — position:fixed means it never shifts with page scroll, but the *button*
+    // can move (the bar centers inside max-width:1400px, so its left edge isn't the viewport edge
+    // on a wide screen), so this has to be live, not a one-time CSS value.
+    const reposition = () => {
+      if (panel.hidden) return;
+      const r = btn.getBoundingClientRect();
+      panel.style.left = Math.round(r.left) + "px";
+      panel.style.top = Math.round(r.bottom + 6) + "px";
+    };
+    const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", String(v)); if (v) reposition(); };
     btn.onclick = () => { const v = panel.hidden; open(v); if (v) panel.querySelector("a:not(.sm-off)").focus(); };
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
     bar.querySelector("[data-lang]").onclick = () => {
       put("site-lang", lang() === "id" ? "en" : "id");
       render(bar);
