@@ -5,14 +5,14 @@
    have chosen, so the list stays out of the way until asked for, and the title no longer needs a
    separate "Menu" button next to it duplicating "where am I" it already states.
 
-   Same file in mettpp.github.io (the home page), RE-screening and RE-jkt. The asset app draws the same
-   bar on the server (RE-asset app/templates/base.html and _macros.html's site_menu()), same look.
+   Same file in mettpp.github.io (the home page), cities and properties. The asset app draws the same
+   bar on the server (assets repo, app/templates/base.html and _macros.html's site_menu()), same look.
 
    Use: <script src="site-menu.js" data-section="screening" defer></script>
    data-section is one of: home, screening, jakarta.
 
    City screening and the per-city finder are one section, the Property finder: screening (published at
-   /RE-screening/) is its overview, "1 · Cities", and the finder (published at /RE-jkt/) its drill-down,
+   /cities/) is its overview, "1 · Cities", and the finder (published at /properties/) its drill-down,
    "2 · Properties". The Menu lists the section once, and both pages get a quick-switch tabs row under
    the bar so you don't have to reopen the Menu just to move between the two steps.
 */
@@ -21,10 +21,10 @@
   const SITE = "https://mettpp.github.io/";
   // Address of the asset app once it is hosted, e.g. "https://assets.example.com/". While blank, the
   // menu uses the app that the shared feed link (pasted under My assets on a map) points to, if any.
-  const ASSET_APP = "https://re-asset.onrender.com/";
+  const ASSET_APP = "https://property-p.onrender.com/";
   const PRODUCT = "Property Portfolio";
 
-  // Mirrors RE-asset's site.* strings (app/translations/{en,id}.json) so the panel reads the same
+  // Mirrors the asset app's site.* strings (app/translations/{en,id}.json) so the panel reads the same
   // whichever of the four places you open it from: Property finder as one umbrella entry (it opens
   // at city screening, the first step), with the two steps as sub-items underneath.
   const T = {
@@ -56,12 +56,12 @@
 
   // On the published site, or the combined local preview (serve.py in mettpp.github.io), the sections
   // sit side by side on one address. A dashboard served on its own links to the published sections.
-  const PATH = { home: "/", screening: "/re-screening/", jakarta: "/re-jkt/" };
+  const PATH = { home: "/", screening: "/cities/", jakarta: "/properties/" };
   const here = location.pathname.toLowerCase();
   const onSite = location.origin + "/" === SITE || (/^https?:$/.test(location.protocol) &&
     (section === "home" ? /^\/(index\.html)?$/.test(here) : here.startsWith(PATH[section])));
   const href = path => (onSite ? "/" : SITE) + path;
-  const LINKS = { home: href(""), screening: href("RE-screening/"), jakarta: href("RE-jkt/") };
+  const LINKS = { home: href(""), screening: href("cities/"), jakarta: href("properties/") };
 
   const CSS = `
 .sm-bar{--sm-paper:#f6f5f0;--sm-surface:#fff;--sm-ink:#1b1f1c;--sm-ink2:#444c46;--sm-line:#dedbd1;--sm-green:#1d6a44;--sm-wash:#e8f1ec;
@@ -131,7 +131,7 @@
     const app = assetApp();
     const item = (k, url, label, sub, ext) => `<a href="${esc(url || "#")}"${k === section ? ' aria-current="page"' : ""}${url ? "" : ' class="sm-off" aria-disabled="true"'}${ext && url ? ' target="_blank" rel="noopener"' : ""}>${svg(ICON[k])}<b>${label}</b><small>${sub}</small></a>`;
     // City screening and the Jakarta finder are the two steps of one "Property finder" feature (see
-    // RE-asset's site.* strings, which this mirrors): one umbrella entry, opening at the first step,
+    // the asset app's site.* strings, which this mirrors): one umbrella entry, opening at the first step,
     // with both steps listed underneath as sub-items — not two flat top-level entries.
     const subItem = (k, url, label, sub) => `<a class="sm-sub" href="${esc(url)}"${k === section ? ' aria-current="page"' : ""}><b>${label}</b><small>${sub}</small></a>`;
     // On either Property finder page, a quick-switch tabs row under the bar moves between the two

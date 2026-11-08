@@ -127,7 +127,7 @@ footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
         <span class="soon" id="assets-soon" data-t="comingSoon" hidden>Coming soon</span>
         <span class="go" id="assets-go" data-t="signIn">Sign in →</span>
       </a>
-      <a class="notify" id="assets-notify" data-t="notifyMe" href="https://github.com/mettpp/RE-asset" target="_blank" rel="noopener" hidden>Track hosting progress on GitHub →</a>
+      <a class="notify" id="assets-notify" data-t="notifyMe" href="https://github.com/mettpp/assets" target="_blank" rel="noopener" hidden>Track hosting progress on GitHub →</a>
     </div>
   </section>
 </main>
@@ -176,7 +176,7 @@ footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
   const EN_TEXT = {};
   document.querySelectorAll("[data-t]").forEach(el => { EN_TEXT[el.dataset.t] = el.textContent; });
 
-  const links = M ? M.links : { screening: "RE-screening/", jakarta: "RE-jkt/" };
+  const links = M ? M.links : { screening: "cities/", jakarta: "properties/" };
   $("#t-screening").href = links.screening;
   $("#t-jakarta").href = links.jakarta;
 

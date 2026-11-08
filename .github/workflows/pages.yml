@@ -1,7 +1,7 @@
 # Publishes site/ (the home page and the shared menu) to GitHub Pages on every push to main.
 # One-time setup: repo Settings > Pages > Build and deployment > Source: "GitHub Actions".
 # This repo is named mettpp.github.io, so the site is the root of https://mettpp.github.io/, and the
-# RE-screening and RE-jkt Pages sites appear under it at /RE-screening/ and /RE-jkt/.
+# cities and properties Pages sites appear under it at /cities/ and /properties/.
 name: Deploy home page to GitHub Pages
 
 on:
