@@ -7,7 +7,7 @@ The start page and the shared **Menu** that make the property tools one product:
 | Home | Big start page: what each tool is for, today's top cities, your asset count | this repo | `https://mettpp.github.io/` |
 | Property finder, 1 · Cities | The overview: which Indonesian city to invest in (formerly City screening) | [cities](https://github.com/mettpp/cities) | `https://mettpp.github.io/cities/` |
 | Property finder, 2 · Properties | The drill-down: which property to visit in a city (Jakarta and the other top cities) | [properties](https://github.com/mettpp/properties) | `https://mettpp.github.io/properties/` |
-| My assets | Rent, bills, documents, finance (logins, database) | [assets](https://github.com/mettpp/assets) | its own server on Render, `https://property-p.onrender.com/` |
+| My assets | Rent, bills, documents, finance (logins, database) | [assets](https://github.com/mettpp/assets) | its own server on Render, `https://re-asset.onrender.com/` |
 
 Every page has the same slim bar at the top: the product name (back to the home page), the section you are in, and a collapsed **Menu** button that lists the three sections. City screening and the finder are one section, the Property finder, in two steps: both pages show the same **1 · Cities / 2 · Properties** tabs under the bar, and the Menu lists the section once with the two steps under it. They stay two repos with their own data pipelines. People rarely switch once they have picked one, so the list stays closed until asked for. The home page remembers the last section you used and offers **Continue to …**. The menu has an English / Bahasa Indonesia switch, remembered per browser.
 
