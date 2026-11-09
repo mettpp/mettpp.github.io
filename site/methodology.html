@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the scores work · Property Portfolio</title>
+<meta name="description" content="Where the data comes from, how city and property scores and weights are computed, and exactly how news adds or takes away points.">
+<style>
+/* Methodology: a long reading page in the home page's paper, ink and green. */
+:root { --paper:#f6f5f0; --surface:#fff; --ink:#1b1f1c; --ink-2:#444c46; --line:#dedbd1; --green:#1d6a44; --green-dark:#14522f; --on-green:#fff; --wash:#e8f1ec;
+  --red:#b4322b; --warn-wash:#f7ecc9; --warn-line:#e3cd92; --warn:#7a4806; color-scheme:light;
+  --float-shadow: 0 1px 2px rgba(27, 31, 28, .06), 0 10px 24px -8px rgba(27, 31, 28, .18); }
+@media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --on-green:#0d1311; --wash:#203029;
+  --red:#f07f76; --warn-wash:#332a12; --warn-line:#5a4a24; --warn:#e5a54b; color-scheme:dark;
+  --float-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 28px -8px rgba(0, 0, 0, .55); } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; accent-color:var(--green); }
+a { color:var(--green-dark); text-underline-offset:2px; }
+:focus-visible { outline:3px solid var(--green); outline-offset:2px; border-radius:4px; }
+.wrap { max-width:880px; margin:0 auto; padding:0 16px; }
+header.page { padding:56px 0 24px; }
+header.page h1 { font-size:clamp(32px, 5vw, 48px); line-height:1.08; letter-spacing:-.025em; margin:0 0 12px; }
+header.page p { color:var(--ink-2); font-size:clamp(16px, 2vw, 19px); margin:0; max-width:60ch; }
+.back { display:inline-block; margin-bottom:18px; font-size:14px; font-weight:600; }
+nav.toc { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 20px; box-shadow:var(--float-shadow); margin:8px 0 32px; }
+nav.toc b { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2); }
+nav.toc ol { margin:6px 0 0; padding-left:20px; columns:2 240px; column-gap:24px; }
+nav.toc li { break-inside:avoid; }
+section { margin:0 0 40px; scroll-margin-top:16px; }
+h2 { font-size:26px; letter-spacing:-.015em; line-height:1.2; margin:0 0 12px; }
+h3 { font-size:18px; margin:24px 0 8px; }
+p { margin:0 0 12px; }
+ul, ol { margin:0 0 12px; padding-left:22px; }
+li { margin:2px 0; }
+.muted { color:var(--ink-2); }
+.small { font-size:14px; }
+code { font:13px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:var(--wash); padding:1px 5px; border-radius:4px; }
+.table-wrap { overflow-x:auto; margin:0 0 14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:14px; font-variant-numeric:tabular-nums; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-weight:600; font-size:13px; color:var(--ink-2); background:var(--surface); }
+tr:last-child td { border-bottom:0; }
+td.n, th.n { text-align:right; white-space:nowrap; }
+.pos { color:var(--green-dark); font-weight:600; } .neg { color:var(--red); font-weight:600; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:var(--float-shadow); margin:0 0 16px; }
+.card > :last-child { margin-bottom:0; }
+.formula { font:15px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:var(--wash); border-radius:8px; padding:12px 14px; margin:0 0 12px; overflow-x:auto; white-space:pre-wrap; }
+.judgement { background:var(--warn-wash); border:1px solid var(--warn-line); border-radius:10px; padding:12px 14px; margin:0 0 14px; font-size:15px; }
+.judgement b:first-child { color:var(--warn); }
+.tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:1px 7px; border-radius:999px; white-space:nowrap; }
+.tag.pub { background:var(--wash); color:var(--green-dark); }
+.tag.jdg { background:var(--warn-wash); color:var(--warn); border:1px solid var(--warn-line); }
+.calc { display:grid; gap:12px; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); align-items:end; margin:0 0 12px; }
+.calc label { display:grid; gap:4px; font-size:14px; color:var(--ink-2); min-width:0; }
+.calc select, .calc input { width:100%; min-width:0; font:inherit; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:8px 10px; min-height:44px; }
+.calc output { display:block; font-size:15px; }
+.calc-out { background:var(--wash); border-radius:8px; padding:12px 14px; }
+.calc-out b { font-size:22px; }
+footer { border-top:1px solid var(--line); padding:20px 0 40px; color:var(--ink-2); font-size:13px; }
+[data-l][hidden] { display:none; }
+@media print { nav.toc, .back { display:none; } .card, .table-wrap { box-shadow:none; } }
+</style>
+</head>
+<body>
+<script src="site-menu.js" data-section="home"></script>
+
+<!-- One article per language. site-menu.js keeps the choice ("site-lang") and fires "site-lang" when it changes. -->
+<main class="wrap">
+
+<!-- ======================================================= ENGLISH -->
+<article data-l="en" lang="en">
+<header class="page">
+  <a class="back" href="./">← Home</a>
+  <h1>How the scores work</h1>
+  <p>Where the data comes from, how each city and property gets its score, and exactly how a news headline adds or takes away points. Every number here is taken from the code that runs the dashboards; where a number is a judgement call rather than a published figure, the page says so.</p>
+</header>
+
+<nav class="toc" aria-label="On this page"><b>On this page</b>
+<ol>
+  <li><a href="#en-sources">Data sources</a></li>
+  <li><a href="#en-cities">City scores (1 · Cities)</a></li>
+  <li><a href="#en-props">Property scores (2 · Properties)</a></li>
+  <li><a href="#en-weights">Strategies and weights</a></li>
+  <li><a href="#en-news">How news adjusts a score</a></li>
+  <li><a href="#en-rules">Every news rule and its points</a></li>
+  <li><a href="#en-schedule">When things refresh</a></li>
+  <li><a href="#en-judgement">Judgement calls and limits</a></li>
+</ol></nav>
+
+<section id="en-sources">
+<h2>1. Data sources</h2>
+<p><span class="tag pub">Published</span> means the figure comes from an outside source as published. <span class="tag jdg">Judgement</span> means it was set by hand in this project's data files and can be edited.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Source</th><th>What it gives</th><th>Used for</th><th>Kind</th></tr></thead>
+<tbody>
+<tr><td>Bank Indonesia residential property price survey (RPPI)</td><td>Year-on-year price change by city, quarterly</td><td>City price momentum</td><td><span class="tag pub">Published</span></td></tr>
+<tr><td>Global Property Guide</td><td>Gross rental yields for 7 areas (Jakarta districts, Tangerang, Surabaya, Bali villas)</td><td>City rental yield, where published</td><td><span class="tag pub">Published</span></td></tr>
+<tr><td>BNPB IRBI 2024</td><td>Provincial disaster risk index</td><td>40% of a city's hazard risk</td><td><span class="tag pub">Published</span></td></tr>
+<tr><td>City list (<code>locations.csv</code>)</td><td>Hazard levels 0–3 (quake, volcano, tsunami, flood, subsidence), demand and liquidity 1–5, estimated yields where none is published</td><td>60% of hazard risk, demand, liquidity, fallback yield</td><td><span class="tag jdg">Judgement</span></td></tr>
+<tr><td>District files (<code>districts.csv</code>, per city)</td><td>Per kecamatan: flood 0–3, sinking cm/yr, coastal 0–1, demand, liquidity, commercial density 1–5, Nusantara adjustment, price benchmarks per m²</td><td>Property safety, demand, liquidity, price check</td><td><span class="tag jdg">Judgement</span> (Jakarta anchored on Colliers, BRIN and InSAR studies; other cities first-pass)</td></tr>
+<tr><td>Rail stations (<code>stations.csv</code>)</td><td>110 stations with line, status and a size tier</td><td>Property rail access and foot traffic</td><td>Stations real, coordinates approximate; <span class="tag jdg">passenger counts are placeholders</span></td></tr>
+<tr><td>NJOP and BPN ZNT</td><td>Official land values per m²</td><td>Price check for land and houses, when you supply ZNT; NJOP shown for reference</td><td><span class="tag pub">Published</span> (NJOP via a secondary source, Jakarta only)</td></tr>
+<tr><td>OpenStreetMap</td><td>Shops, food, offices and transit stops around each point</td><td>Property foot traffic</td><td><span class="tag pub">Open data</span>, thinner outside central Jakarta</td></tr>
+<tr><td>Google News RSS</td><td>Headlines, Indonesian and English editions</td><td>Small, capped score adjustments</td><td><span class="tag pub">Published headlines</span>, matched automatically</td></tr>
+<tr><td>Your own CSV</td><td>Listings: price, size, rent, certificate, floor, coordinates</td><td>Everything property-specific</td><td>Yours; stays in your browser</td></tr>
+</tbody></table></div>
+<p class="small muted">The asset app (My assets) is not scored. Its shared feed only sends each asset's name, type, city, pin and outline to the maps, so your assets can be shown next to the rankings.</p>
+</section>
+
+<section id="en-cities">
+<h2>2. City scores (1 · Cities)</h2>
+<p>Each city gets six sub-scores on a 0–100 scale. Each is scaled against <b>fixed reference points</b>, not against the other cities, so a score keeps its meaning when cities are added.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Sub-score</th><th>Input</th><th class="n">Scores 0 at</th><th class="n">Scores 100 at</th></tr></thead>
+<tbody>
+<tr><td>Price momentum</td><td>Average of the two latest quarters' year-on-year price change (the city's own index, or the 18-city national average where a city has none)</td><td class="n">−0.5%</td><td class="n">+3.0%</td></tr>
+<tr><td>Rental yield</td><td>Gross yield, published where available, otherwise the estimate (shown grey)</td><td class="n">3%</td><td class="n">10%</td></tr>
+<tr><td>Demand</td><td>Judgement score 1–5</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Liquidity</td><td>Judgement score 1–5</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Hazard safety</td><td>100 − hazard risk (below)</td><td class="n">risk 100</td><td class="n">risk 0</td></tr>
+<tr><td>Foot traffic</td><td>OpenStreetMap activity points around the city centre</td><td class="n">0</td><td class="n">400</td></tr>
+</tbody></table></div>
+<h3>Hazard risk</h3>
+<div class="formula">local  = (quake + volcano + tsunami + flood + subsidence) ÷ 15 × 100     each level 0–3
+IRBI   = provincial index scaled 50 → 0 … 170 → 100
+hazard risk   = 0.6 × local + 0.4 × IRBI
+hazard safety = 100 − hazard risk</div>
+<p>Values in between are straight-line, and anything beyond a reference point stops at 0 or 100.</p>
+<h3>From sub-scores to one index</h3>
+<div class="formula">index = Σ (sub-score × weight) ÷ Σ (weights of the sub-scores that exist), rounded</div>
+<p>If a sub-score has no data, it drops out and the rest are re-weighted. Today that applies to <b>foot traffic in the city ranking</b>: there is no <code>foot_traffic.csv</code> yet, so its weight is shared out over the other five. For example, the develop strategy's 30% on hazard safety really counts as 30 ÷ 90 = 33%.</p>
+<p>The <b>7-day</b> column compares today's index with the one stored about a week ago in <code>history.csv</code> (kept for 400 days).</p>
+</section>
+
+<section id="en-props">
+<h2>3. Property scores (2 · Properties)</h2>
+<p>Each property in your CSV is placed in its city and kecamatan (from the <code>city</code> column, else its coordinates), then gets seven sub-scores, also against fixed reference points.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Sub-score</th><th>How it is worked out</th><th class="n">0 at</th><th class="n">100 at</th></tr></thead>
+<tbody>
+<tr><td>Price check (value)</td><td>Asking price per m² ÷ the district benchmark (floor m² for apartments and offices, land m² otherwise). For land, houses and shophouses with a ZNT figure: the land part of the price ÷ ZNT instead. Leaseholds are not scored.</td><td class="n">1.3× (ZNT 1.8×)</td><td class="n">0.7× (ZNT 0.9×)</td></tr>
+<tr><td>Rental yield</td><td>Quoted rent × 12 ÷ price; without rent, a type default (apartment 5.5%, office 6.5%, landed 3.5%, shophouse 5.0%, land none)</td><td class="n">3%</td><td class="n">9%</td></tr>
+<tr><td>Rail access (transit)</td><td>Walking distance to the nearest operating station; a planned station counts half; +10 for each extra station within 800 m, at most +20. Not scored in cities without rail.</td><td class="n">2,000 m</td><td class="n">300 m</td></tr>
+<tr><td>Hazard safety</td><td>100 − hazard risk, from the kecamatan's bands (below)</td><td class="n">risk 100</td><td class="n">risk 0</td></tr>
+<tr><td>Demand</td><td>District demand 1–5 scaled to 0–100, plus the Nusantara adjustment (for example −8 for Gambir, where ministries are moving out)</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Liquidity</td><td>District liquidity 1–5, adjusted for type (office −1, shophouse −0.5, land −1) and title (SHM or strata 0, HGB −0.25, HP −0.5, anything else −1.5)</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Foot traffic</td><td>A blend: 45% station passengers within 1 km (0 → 60,000 a day), 35% OpenStreetMap activity within 500 m (0 → 150 points), 20% district commercial density 1–5. A missing part drops out.</td><td class="n">—</td><td class="n">—</td></tr>
+</tbody></table></div>
+<h3>Hazard risk for a property</h3>
+<div class="formula">hazard risk = 100 × (0.45 × flood ÷ 3  +  0.35 × min(1, sinking cm/yr ÷ 10)  +  0.20 × coastal)
+flood counts × 0.6 for an apartment or office on floor 3 or higher</div>
+<p>The index is the same weighted mean as for cities, with the property strategies below.</p>
+</section>
+
+<section id="en-weights">
+<h2>4. Strategies and weights</h2>
+<p>A strategy is a set of weights. You can drag the sliders on either page to make your own; the page normalises them to 100%.</p>
+<h3>Cities</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Strategy</th><th class="n">Momentum</th><th class="n">Yield</th><th class="n">Demand</th><th class="n">Liquidity</th><th class="n">Hazard safety</th><th class="n">Foot traffic</th></tr></thead>
+<tbody>
+<tr><td>Develop &amp; sell</td><td class="n">20%</td><td class="n">0%</td><td class="n">30%</td><td class="n">10%</td><td class="n">30%</td><td class="n">10%</td></tr>
+<tr><td>Buy to sell</td><td class="n">40%</td><td class="n">0%</td><td class="n">25%</td><td class="n">20%</td><td class="n">10%</td><td class="n">5%</td></tr>
+<tr><td>Buy to rent</td><td class="n">0%</td><td class="n">40%</td><td class="n">15%</td><td class="n">10%</td><td class="n">25%</td><td class="n">10%</td></tr>
+<tr><td>Balanced</td><td class="n">18%</td><td class="n">18%</td><td class="n">16%</td><td class="n">16%</td><td class="n">16%</td><td class="n">16%</td></tr>
+</tbody></table></div>
+<h3>Properties</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Strategy</th><th class="n">Price check</th><th class="n">Yield</th><th class="n">Rail</th><th class="n">Hazard safety</th><th class="n">Demand</th><th class="n">Liquidity</th><th class="n">Foot traffic</th></tr></thead>
+<tbody>
+<tr><td>Buy to rent</td><td class="n">5%</td><td class="n">35%</td><td class="n">15%</td><td class="n">20%</td><td class="n">10%</td><td class="n">5%</td><td class="n">10%</td></tr>
+<tr><td>Buy to sell</td><td class="n">30%</td><td class="n">0%</td><td class="n">10%</td><td class="n">10%</td><td class="n">20%</td><td class="n">20%</td><td class="n">10%</td></tr>
+<tr><td>Develop</td><td class="n">25%</td><td class="n">0%</td><td class="n">15%</td><td class="n">25%</td><td class="n">25%</td><td class="n">5%</td><td class="n">5%</td></tr>
+<tr><td>Balanced</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">10%</td><td class="n">15%</td></tr>
+</tbody></table></div>
+<div class="judgement"><b>Judgement call.</b> The weights are this project's view of what matters for each plan, not a fitted model. Nothing was back-tested against past prices.</div>
+</section>
+
+<section id="en-news">
+<h2>5. How news adjusts a score</h2>
+<p>Every morning the pipeline reads new headlines, and a headline can move <b>one sub-score of one place</b> by a few points. It works in five steps.</p>
+<ol>
+  <li><b>Find the place.</b> The headline itself must name the place (for example "Gresik", "Kelapa Gading"). A wider name counts for several places at a reduced share: "Jakarta" counts half (0.5) for each of the three Jakarta areas, "Jabodetabek" 0.4 for six areas, "Bali" 0.5 for three. A specific name wins over the wider one.</li>
+  <li><b>Find the topic.</b> The headline is checked against the rules in the table below: words it must contain, and words that cancel it (a flood story that is about "antisipasi" or "pompa" is not counted as a flood). Each rule moves one sub-score, up or down, with a strength of 1 or 2.</li>
+  <li><b>Work out the points.</b></li>
+</ol>
+<div class="formula">points = direction × strength × 2 × place share × ½^(days old ÷ 30)</div>
+<ol start="4">
+  <li><b>Count each story once.</b> For each place, sub-score, rule and day, only the strongest matching headline counts, so twenty outlets running the same story count once. Headlines older than 90 days are dropped.</li>
+  <li><b>Cap the total.</b> All the points for one place and sub-score are added up and passed through a smooth limit, so they can never go past the cap:</li>
+</ol>
+<div class="formula">adjustment = cap × tanh(total ÷ cap)      cap = 8 points (5 for price momentum, 4 for yield)</div>
+
+<div class="card">
+<h3 style="margin-top:0">Worked example: a flood headline and the hazard score</h3>
+<p>On 8 November 2026 the log picked up <i>"Jalan Nasional Semarang-Demak Rawan Banjir Jelang Nataru…"</i>. It names Semarang and contains "banjir", so the <b>flood</b> rule matches: hazard safety, direction −1, strength 1.</p>
+<div class="formula">points = −1 × 1 × 2 × 1.0 (named directly) × ½^(0 ÷ 30) = −2.0 on hazard safety</div>
+<p>Hazard safety is 100 − hazard risk, so <b>−2 on safety is the same as +2 on hazard risk</b>. On its own it stays about −2 after the cap (8 × tanh(2 ÷ 8) = 1.96). It is −1.0 after 30 days, −0.5 after 60, and gone after 90.</p>
+<p>The same day, <i>"Langkah Pemkab Gresik Antisipasi Banjir: Evaluasi Rumah Pompa…"</i> went the other way: "antisipasi" and "pompa" cancel the flood rule, and "rumah pompa" matches <b>flood defence</b>, so Surabaya and Gresik got <span class="pos">+2.0</span> on hazard safety. <i>"BRIN Ungkap Ancaman Megathrust Jawa dan Tsunami ke Jakarta"</i> matched the <b>earthquake, tsunami or eruption</b> rule through "tsunami" (strength 2) but named only "Jakarta", so each Jakarta area got 2 × 2 × 0.5 = <span class="neg">−2.0</span>.</p>
+<p><b>What it does to the index:</b> a sub-score point is worth its weight. With develop &amp; sell (30% on hazard safety, re-weighted to 33% while foot traffic is missing), −2 on safety moves the city's index by about −0.7, before rounding. The <b>News</b> column in the ranking shows the total effect per city; untick <i>Include news adjustments</i> to see the scores without it.</p>
+</div>
+
+<h3>Try it</h3>
+<div class="card">
+<div class="calc" id="en-calc">
+  <label>Rule<select data-k="rule"></select></label>
+  <label>How the place is named<select data-k="share"><option value="1">By name (100%)</option><option value="0.5">"Jakarta", "Bali" (50%)</option><option value="0.4">"Jabodetabek", or no place for a nationwide rule (40%)</option></select></label>
+  <label>Days old<input data-k="age" type="number" min="0" max="90" value="0"></label>
+  <label>Same-topic stories on other days<input data-k="n" type="number" min="1" max="30" value="1"></label>
+</div>
+<div class="calc-out" aria-live="polite"><output data-k="out"></output></div>
+</div>
+
+<h3>Stories with no place</h3>
+<p>Rules marked <b>nationwide</b> below (price, interest rates, housing incentives, sales) also count when the headline names no place: in the city ranking they apply to every city at 40%, so a nationwide rate cut gives each city 2 × 0.4 = +0.8 on price momentum. In the property ranking they apply to every district of the city whose news search found the story, also at 40%.</p>
+<h3>Differences in the property ranking</h3>
+<p>Property news works per kecamatan, with the same rules and settings, but only three sub-scores move: <b>demand</b>, <b>hazard safety</b> and <b>liquidity</b>. Price and rent stories are counted as demand. The cap is 8 points on each. One extra rule there, <b>government offices moving to Nusantara</b>, takes 2 points off demand in the district named.</p>
+<p>To drop a misread headline, add its id to <code>data/news_overrides.csv</code> in the repository. It stops counting on the next run.</p>
+</section>
+
+<section id="en-rules">
+<h2>6. Every news rule and its points</h2>
+<p>Points are for a headline published today that names the place directly. Halve them for every 30 days of age, and multiply by the share when only a wider name is used.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Rule</th><th>Example words</th><th>Moves</th><th class="n">Points</th><th>Needs a place?</th></tr></thead>
+<tbody id="en-rules-body"></tbody>
+</table></div>
+</section>
+
+<section id="en-schedule">
+<h2>7. When things refresh</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>What</th><th>When</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td>News and scores, cities</td><td>Every day at 06:00 Jakarta time (23:00 UTC)</td><td>Fetches the last 24 hours of headlines (a new, empty log backfills 90 days), recomputes every score, runs the tests, commits and republishes the page</td></tr>
+<tr><td>News, properties</td><td>Every day at 06:00 Jakarta time</td><td>The same per city, then rebuilds each district's news adjustments</td></tr>
+<tr><td>Update now buttons</td><td>When you press them</td><td>Run the same daily job straight away (needs a GitHub token with Actions access); the page updates a few minutes later</td></tr>
+<tr><td>Bank Indonesia price survey</td><td>Checked in the daily run</td><td>When a newer quarter is out, the page shows a banner and a GitHub issue is opened. The new figures are added to <code>rppi.csv</code> by hand; the two latest quarters are then used automatically</td></tr>
+<tr><td>OpenStreetMap activity, properties</td><td>On the 1st of each month at 05:00 Jakarta time, and when a city is added</td><td>Rebuilds each city's activity grid for foot traffic</td></tr>
+<tr><td>Everything else</td><td>When someone edits the data files</td><td>Yields, IRBI, hazard bands, demand, liquidity, stations and benchmarks change only when the CSV files are edited</td></tr>
+</tbody></table></div>
+<p class="small muted">GitHub can start scheduled jobs late by several minutes, sometimes more, at busy times.</p>
+</section>
+
+<section id="en-judgement">
+<h2>8. Judgement calls and limits</h2>
+<ul>
+  <li><b>Reference points</b> (−0.5% to 3% growth, 3% to 10% yield, 1.3× to 0.7× of the benchmark and so on) were chosen to spread Indonesian cities and districts across the scale. Moving one changes every score.</li>
+  <li><b>Hazard levels, demand and liquidity</b> for cities and districts are hand-set from research and news, not measured. Districts outside Jakarta are a first pass without a site visit.</li>
+  <li><b>Hazard mix</b>: 60% local levels and 40% provincial IRBI for cities, and 45% flood, 35% sinking and 20% coastal for properties, are judgement weights.</li>
+  <li><b>News size</b>: 2 points per strength level, a 30-day half-life, 90 days, the caps and the 0.4 and 0.5 shares were set so news can tip close calls but cannot outweigh fundamentals. They were not fitted to data.</li>
+  <li><b>Headline matching is crude.</b> It reads words, not meaning: "flood" in a story about flood prevention, or a toll road named in a traffic story, can be miscounted. The dashboards list every headline that moved a score, with its link. Open the story before relying on it.</li>
+  <li><b>Station passenger tiers</b> are placeholders, and OpenStreetMap is thinner in smaller cities, so a low foot-traffic score can mean "not mapped" rather than "quiet".</li>
+  <li>These are screening tools for deciding where to look closer. They are not investment, legal or engineering advice: check titles with a notary/PPAT, visit the site and survey its hazards before buying.</li>
+</ul>
+</section>
+</article>
+
+<!-- ======================================================= BAHASA INDONESIA -->
+<article data-l="id" lang="id" hidden>
+<header class="page">
+  <a class="back" href="./">← Beranda</a>
+  <h1>Cara skor dihitung</h1>
+  <p>Dari mana datanya, bagaimana setiap kota dan properti mendapat skor, dan persis bagaimana sebuah berita menambah atau mengurangi poin. Setiap angka di sini diambil dari kode yang menjalankan dasbor; bila sebuah angka adalah penilaian sendiri, bukan angka resmi, halaman ini menyebutkannya.</p>
+</header>
+
+<nav class="toc" aria-label="Di halaman ini"><b>Di halaman ini</b>
+<ol>
+  <li><a href="#id-sources">Sumber data</a></li>
+  <li><a href="#id-cities">Skor kota (1 · Kota)</a></li>
+  <li><a href="#id-props">Skor properti (2 · Properti)</a></li>
+  <li><a href="#id-weights">Strategi dan bobot</a></li>
+  <li><a href="#id-news">Cara berita menggeser skor</a></li>
+  <li><a href="#id-rules">Semua aturan berita dan poinnya</a></li>
+  <li><a href="#id-schedule">Jadwal pembaruan</a></li>
+  <li><a href="#id-judgement">Penilaian sendiri dan batasan</a></li>
+</ol></nav>
+
+<section id="id-sources">
+<h2>1. Sumber data</h2>
+<p><span class="tag pub">Resmi</span> berarti angka berasal dari sumber luar sebagaimana diterbitkan. <span class="tag jdg">Penilaian</span> berarti angka ditetapkan manual di berkas data proyek ini dan bisa diubah.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Sumber</th><th>Isinya</th><th>Dipakai untuk</th><th>Jenis</th></tr></thead>
+<tbody>
+<tr><td>Survei Harga Properti Residensial Bank Indonesia (IHPR)</td><td>Perubahan harga tahunan per kota, triwulanan</td><td>Momentum harga kota</td><td><span class="tag pub">Resmi</span></td></tr>
+<tr><td>Global Property Guide</td><td>Imbal hasil sewa kotor untuk 7 area (wilayah Jakarta, Tangerang, Surabaya, vila Bali)</td><td>Imbal hasil kota, bila tersedia</td><td><span class="tag pub">Resmi</span></td></tr>
+<tr><td>BNPB IRBI 2024</td><td>Indeks risiko bencana provinsi</td><td>40% risiko bencana kota</td><td><span class="tag pub">Resmi</span></td></tr>
+<tr><td>Daftar kota (<code>locations.csv</code>)</td><td>Tingkat bahaya 0–3 (gempa, gunung api, tsunami, banjir, penurunan tanah), permintaan dan likuiditas 1–5, perkiraan imbal hasil bila tidak ada angka resmi</td><td>60% risiko bencana, permintaan, likuiditas, imbal hasil cadangan</td><td><span class="tag jdg">Penilaian</span></td></tr>
+<tr><td>Berkas kecamatan (<code>districts.csv</code>, per kota)</td><td>Per kecamatan: banjir 0–3, penurunan tanah cm/tahun, pesisir 0–1, permintaan, likuiditas, kepadatan komersial 1–5, penyesuaian Nusantara, patokan harga per m²</td><td>Keamanan bencana, permintaan, likuiditas, cek harga properti</td><td><span class="tag jdg">Penilaian</span> (Jakarta berpatokan pada Colliers, BRIN dan studi InSAR; kota lain masih tahap awal)</td></tr>
+<tr><td>Stasiun kereta (<code>stations.csv</code>)</td><td>110 stasiun dengan jalur, status dan kelas ukuran</td><td>Akses rel dan keramaian properti</td><td>Stasiun nyata, koordinat perkiraan; <span class="tag jdg">jumlah penumpang sementara</span></td></tr>
+<tr><td>NJOP dan ZNT BPN</td><td>Nilai tanah resmi per m²</td><td>Cek harga tanah dan rumah bila Anda mengisi ZNT; NJOP sebagai acuan</td><td><span class="tag pub">Resmi</span> (NJOP lewat sumber sekunder, hanya Jakarta)</td></tr>
+<tr><td>OpenStreetMap</td><td>Toko, tempat makan, kantor dan halte di sekitar titik</td><td>Keramaian properti</td><td><span class="tag pub">Data terbuka</span>, lebih tipis di luar Jakarta pusat</td></tr>
+<tr><td>Google News RSS</td><td>Judul berita, edisi Indonesia dan Inggris</td><td>Penyesuaian skor kecil yang dibatasi</td><td><span class="tag pub">Berita terbit</span>, dicocokkan otomatis</td></tr>
+<tr><td>CSV Anda</td><td>Listing: harga, luas, sewa, sertifikat, lantai, koordinat</td><td>Semua yang khusus per properti</td><td>Milik Anda; tetap di peramban Anda</td></tr>
+</tbody></table></div>
+<p class="small muted">Aplikasi aset (Aset saya) tidak diberi skor. Shared feed-nya hanya mengirim nama, jenis, kota, pin dan batas tiap aset ke peta, agar aset Anda bisa tampil di samping peringkat.</p>
+</section>
+
+<section id="id-cities">
+<h2>2. Skor kota (1 · Kota)</h2>
+<p>Setiap kota mendapat enam sub-skor berskala 0–100. Masing-masing diukur terhadap <b>titik acuan tetap</b>, bukan terhadap kota lain, sehingga arti skor tidak berubah saat kota ditambahkan.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Sub-skor</th><th>Masukan</th><th class="n">Skor 0 pada</th><th class="n">Skor 100 pada</th></tr></thead>
+<tbody>
+<tr><td>Momentum harga</td><td>Rata-rata perubahan harga tahunan dua triwulan terakhir (indeks kota itu, atau rata-rata nasional 18 kota bila tidak ada)</td><td class="n">−0,5%</td><td class="n">+3,0%</td></tr>
+<tr><td>Imbal hasil sewa</td><td>Imbal hasil kotor, resmi bila ada, selain itu perkiraan (ditampilkan abu-abu)</td><td class="n">3%</td><td class="n">10%</td></tr>
+<tr><td>Permintaan</td><td>Skor penilaian 1–5</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Likuiditas</td><td>Skor penilaian 1–5</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Keamanan bencana</td><td>100 − risiko bencana (di bawah)</td><td class="n">risiko 100</td><td class="n">risiko 0</td></tr>
+<tr><td>Keramaian</td><td>Poin aktivitas OpenStreetMap di sekitar pusat kota</td><td class="n">0</td><td class="n">400</td></tr>
+</tbody></table></div>
+<h3>Risiko bencana</h3>
+<div class="formula">lokal = (gempa + gunung api + tsunami + banjir + penurunan tanah) ÷ 15 × 100     tiap tingkat 0–3
+IRBI  = indeks provinsi diskalakan 50 → 0 … 170 → 100
+risiko bencana   = 0,6 × lokal + 0,4 × IRBI
+keamanan bencana = 100 − risiko bencana</div>
+<p>Nilai di antaranya garis lurus, dan nilai di luar titik acuan berhenti di 0 atau 100.</p>
+<h3>Dari sub-skor ke satu indeks</h3>
+<div class="formula">indeks = Σ (sub-skor × bobot) ÷ Σ (bobot sub-skor yang ada), dibulatkan</div>
+<p>Bila sebuah sub-skor tidak punya data, ia keluar dan sisanya dibobot ulang. Saat ini itu berlaku untuk <b>keramaian di peringkat kota</b>: belum ada <code>foot_traffic.csv</code>, jadi bobotnya dibagi ke lima sub-skor lain. Misalnya, 30% keamanan bencana pada strategi bangun-dan-jual sebenarnya bernilai 30 ÷ 90 = 33%.</p>
+<p>Kolom <b>7 hari</b> membandingkan indeks hari ini dengan indeks sekitar seminggu lalu di <code>history.csv</code> (disimpan 400 hari).</p>
+</section>
+
+<section id="id-props">
+<h2>3. Skor properti (2 · Properti)</h2>
+<p>Setiap properti di CSV Anda ditempatkan di kota dan kecamatannya (dari kolom <code>city</code>, atau dari koordinatnya), lalu mendapat tujuh sub-skor, juga terhadap titik acuan tetap.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Sub-skor</th><th>Cara menghitung</th><th class="n">0 pada</th><th class="n">100 pada</th></tr></thead>
+<tbody>
+<tr><td>Cek harga</td><td>Harga per m² ÷ patokan kecamatan (luas bangunan untuk apartemen dan kantor, luas tanah untuk lainnya). Untuk tanah, rumah dan ruko yang punya angka ZNT: bagian tanah dari harga ÷ ZNT. Hak sewa tidak dinilai.</td><td class="n">1,3× (ZNT 1,8×)</td><td class="n">0,7× (ZNT 0,9×)</td></tr>
+<tr><td>Imbal hasil sewa</td><td>Sewa × 12 ÷ harga; tanpa sewa, nilai bawaan per jenis (apartemen 5,5%, kantor 6,5%, rumah tapak 3,5%, ruko 5,0%, tanah tidak ada)</td><td class="n">3%</td><td class="n">9%</td></tr>
+<tr><td>Akses rel</td><td>Jarak jalan ke stasiun beroperasi terdekat; stasiun rencana dihitung setengah; +10 untuk tiap stasiun tambahan dalam 800 m, paling banyak +20. Tidak dinilai di kota tanpa rel.</td><td class="n">2.000 m</td><td class="n">300 m</td></tr>
+<tr><td>Keamanan bencana</td><td>100 − risiko bencana, dari kelas kecamatan (di bawah)</td><td class="n">risiko 100</td><td class="n">risiko 0</td></tr>
+<tr><td>Permintaan</td><td>Permintaan kecamatan 1–5 diskalakan ke 0–100, ditambah penyesuaian Nusantara (misalnya −8 untuk Gambir, tempat kementerian pindah)</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Likuiditas</td><td>Likuiditas kecamatan 1–5, disesuaikan untuk jenis (kantor −1, ruko −0,5, tanah −1) dan sertifikat (SHM atau strata 0, HGB −0,25, HP −0,5, lainnya −1,5)</td><td class="n">1</td><td class="n">5</td></tr>
+<tr><td>Keramaian</td><td>Campuran: 45% penumpang stasiun dalam 1 km (0 → 60.000 per hari), 35% aktivitas OpenStreetMap dalam 500 m (0 → 150 poin), 20% kepadatan komersial kecamatan 1–5. Bagian yang tidak ada dikeluarkan.</td><td class="n">—</td><td class="n">—</td></tr>
+</tbody></table></div>
+<h3>Risiko bencana sebuah properti</h3>
+<div class="formula">risiko bencana = 100 × (0,45 × banjir ÷ 3  +  0,35 × min(1, penurunan cm/tahun ÷ 10)  +  0,20 × pesisir)
+banjir dihitung × 0,6 untuk apartemen atau kantor di lantai 3 ke atas</div>
+<p>Indeksnya rata-rata berbobot yang sama seperti kota, dengan strategi properti di bawah.</p>
+</section>
+
+<section id="id-weights">
+<h2>4. Strategi dan bobot</h2>
+<p>Strategi adalah satu set bobot. Anda bisa menggeser slider di kedua halaman untuk membuat sendiri; halaman menormalkannya ke 100%.</p>
+<h3>Kota</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Strategi</th><th class="n">Momentum</th><th class="n">Imbal hasil</th><th class="n">Permintaan</th><th class="n">Likuiditas</th><th class="n">Keamanan bencana</th><th class="n">Keramaian</th></tr></thead>
+<tbody>
+<tr><td>Bangun &amp; jual</td><td class="n">20%</td><td class="n">0%</td><td class="n">30%</td><td class="n">10%</td><td class="n">30%</td><td class="n">10%</td></tr>
+<tr><td>Beli untuk dijual</td><td class="n">40%</td><td class="n">0%</td><td class="n">25%</td><td class="n">20%</td><td class="n">10%</td><td class="n">5%</td></tr>
+<tr><td>Beli untuk disewakan</td><td class="n">0%</td><td class="n">40%</td><td class="n">15%</td><td class="n">10%</td><td class="n">25%</td><td class="n">10%</td></tr>
+<tr><td>Seimbang</td><td class="n">18%</td><td class="n">18%</td><td class="n">16%</td><td class="n">16%</td><td class="n">16%</td><td class="n">16%</td></tr>
+</tbody></table></div>
+<h3>Properti</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Strategi</th><th class="n">Cek harga</th><th class="n">Imbal hasil</th><th class="n">Rel</th><th class="n">Keamanan bencana</th><th class="n">Permintaan</th><th class="n">Likuiditas</th><th class="n">Keramaian</th></tr></thead>
+<tbody>
+<tr><td>Beli untuk disewakan</td><td class="n">5%</td><td class="n">35%</td><td class="n">15%</td><td class="n">20%</td><td class="n">10%</td><td class="n">5%</td><td class="n">10%</td></tr>
+<tr><td>Beli untuk dijual</td><td class="n">30%</td><td class="n">0%</td><td class="n">10%</td><td class="n">10%</td><td class="n">20%</td><td class="n">20%</td><td class="n">10%</td></tr>
+<tr><td>Bangun</td><td class="n">25%</td><td class="n">0%</td><td class="n">15%</td><td class="n">25%</td><td class="n">25%</td><td class="n">5%</td><td class="n">5%</td></tr>
+<tr><td>Seimbang</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">15%</td><td class="n">10%</td><td class="n">15%</td></tr>
+</tbody></table></div>
+<div class="judgement"><b>Penilaian sendiri.</b> Bobot ini adalah pandangan proyek tentang apa yang penting untuk tiap rencana, bukan model yang dicocokkan dengan data. Belum pernah diuji terhadap harga masa lalu.</div>
+</section>
+
+<section id="id-news">
+<h2>5. Cara berita menggeser skor</h2>
+<p>Setiap pagi sistem membaca judul berita baru, dan satu judul bisa menggeser <b>satu sub-skor di satu tempat</b> beberapa poin. Ada lima langkah.</p>
+<ol>
+  <li><b>Cari tempatnya.</b> Judul itu sendiri harus menyebut tempatnya (misalnya "Gresik", "Kelapa Gading"). Nama yang lebih luas dihitung untuk beberapa tempat dengan porsi lebih kecil: "Jakarta" bernilai setengah (0,5) untuk tiap dari tiga area Jakarta, "Jabodetabek" 0,4 untuk enam area, "Bali" 0,5 untuk tiga. Nama yang spesifik mengalahkan nama yang luas.</li>
+  <li><b>Cari topiknya.</b> Judul dicocokkan dengan aturan di tabel bawah: kata yang harus ada, dan kata yang membatalkannya (berita banjir yang berisi "antisipasi" atau "pompa" tidak dihitung sebagai banjir). Tiap aturan menggeser satu sub-skor, naik atau turun, dengan kekuatan 1 atau 2.</li>
+  <li><b>Hitung poinnya.</b></li>
+</ol>
+<div class="formula">poin = arah × kekuatan × 2 × porsi tempat × ½^(umur hari ÷ 30)</div>
+<ol start="4">
+  <li><b>Satu berita dihitung sekali.</b> Untuk tiap tempat, sub-skor, aturan dan hari, hanya judul terkuat yang dihitung, jadi dua puluh media yang memuat berita sama dihitung sekali. Berita lebih dari 90 hari dibuang.</li>
+  <li><b>Batasi totalnya.</b> Semua poin untuk satu tempat dan sub-skor dijumlahkan lalu dilewatkan batas halus, sehingga tidak pernah melewati batas:</li>
+</ol>
+<div class="formula">penyesuaian = batas × tanh(total ÷ batas)      batas = 8 poin (5 untuk momentum harga, 4 untuk imbal hasil)</div>
+
+<div class="card">
+<h3 style="margin-top:0">Contoh: berita banjir dan skor bencana</h3>
+<p>Pada 8 November 2026 log menangkap <i>"Jalan Nasional Semarang-Demak Rawan Banjir Jelang Nataru…"</i>. Judul itu menyebut Semarang dan berisi "banjir", jadi aturan <b>banjir</b> cocok: keamanan bencana, arah −1, kekuatan 1.</p>
+<div class="formula">poin = −1 × 1 × 2 × 1,0 (disebut langsung) × ½^(0 ÷ 30) = −2,0 pada keamanan bencana</div>
+<p>Keamanan bencana adalah 100 − risiko bencana, jadi <b>−2 pada keamanan sama dengan +2 pada risiko bencana</b>. Sendirian, nilainya tetap sekitar −2 setelah dibatasi (8 × tanh(2 ÷ 8) = 1,96). Menjadi −1,0 setelah 30 hari, −0,5 setelah 60 hari, dan hilang setelah 90 hari.</p>
+<p>Di hari yang sama, <i>"Langkah Pemkab Gresik Antisipasi Banjir: Evaluasi Rumah Pompa…"</i> justru sebaliknya: "antisipasi" dan "pompa" membatalkan aturan banjir, dan "rumah pompa" cocok dengan <b>pertahanan banjir</b>, sehingga Surabaya dan Gresik mendapat <span class="pos">+2,0</span> pada keamanan bencana. <i>"BRIN Ungkap Ancaman Megathrust Jawa dan Tsunami ke Jakarta"</i> cocok dengan aturan <b>gempa, tsunami atau erupsi</b> lewat kata "tsunami" (kekuatan 2) tetapi hanya menyebut "Jakarta", jadi tiap area Jakarta mendapat 2 × 2 × 0,5 = <span class="neg">−2,0</span>.</p>
+<p><b>Pengaruhnya ke indeks:</b> satu poin sub-skor bernilai sebesar bobotnya. Dengan bangun &amp; jual (30% keamanan bencana, dibobot ulang ke 33% selama keramaian belum ada), −2 pada keamanan menggeser indeks kota sekitar −0,7 sebelum pembulatan. Kolom <b>Berita</b> di peringkat menunjukkan total pengaruhnya per kota; hapus centang penyesuaian berita untuk melihat skor tanpa berita.</p>
+</div>
+
+<h3>Coba sendiri</h3>
+<div class="card">
+<div class="calc" id="id-calc">
+  <label>Aturan<select data-k="rule"></select></label>
+  <label>Cara tempat disebut<select data-k="share"><option value="1">Disebut namanya (100%)</option><option value="0.5">"Jakarta", "Bali" (50%)</option><option value="0.4">"Jabodetabek", atau tanpa tempat untuk aturan nasional (40%)</option></select></label>
+  <label>Umur (hari)<input data-k="age" type="number" min="0" max="90" value="0"></label>
+  <label>Berita topik sama di hari lain<input data-k="n" type="number" min="1" max="30" value="1"></label>
+</div>
+<div class="calc-out" aria-live="polite"><output data-k="out"></output></div>
+</div>
+
+<h3>Berita tanpa tempat</h3>
+<p>Aturan bertanda <b>nasional</b> di bawah (harga, suku bunga, insentif rumah, penjualan) juga dihitung bila judul tidak menyebut tempat: di peringkat kota berlaku untuk semua kota dengan porsi 40%, jadi penurunan suku bunga nasional memberi tiap kota 2 × 0,4 = +0,8 pada momentum harga. Di peringkat properti berlaku untuk semua kecamatan di kota yang pencarian beritanya menemukan berita itu, juga 40%.</p>
+<h3>Perbedaan di peringkat properti</h3>
+<p>Berita properti bekerja per kecamatan dengan aturan dan pengaturan yang sama, tetapi hanya tiga sub-skor yang bergerak: <b>permintaan</b>, <b>keamanan bencana</b> dan <b>likuiditas</b>. Berita harga dan sewa dihitung sebagai permintaan. Batasnya 8 poin untuk masing-masing. Ada satu aturan tambahan, <b>kantor pemerintah pindah ke Nusantara</b>, yang mengurangi permintaan 2 poin di kecamatan yang disebut.</p>
+<p>Untuk membuang judul yang salah baca, tambahkan id-nya ke <code>data/news_overrides.csv</code> di repositori. Judul itu tidak dihitung lagi pada proses berikutnya.</p>
+</section>
+
+<section id="id-rules">
+<h2>6. Semua aturan berita dan poinnya</h2>
+<p>Poin berlaku untuk berita yang terbit hari ini dan menyebut tempatnya langsung. Bagi dua untuk tiap 30 hari umur berita, dan kalikan dengan porsinya bila hanya nama yang lebih luas yang disebut.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Aturan</th><th>Contoh kata</th><th>Menggeser</th><th class="n">Poin</th><th>Perlu tempat?</th></tr></thead>
+<tbody id="id-rules-body"></tbody>
+</table></div>
+</section>
+
+<section id="id-schedule">
+<h2>7. Jadwal pembaruan</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Apa</th><th>Kapan</th><th>Yang terjadi</th></tr></thead>
+<tbody>
+<tr><td>Berita dan skor, kota</td><td>Setiap hari pukul 06.00 WIB (23.00 UTC)</td><td>Mengambil berita 24 jam terakhir (log baru yang kosong mengisi 90 hari ke belakang), menghitung ulang semua skor, menjalankan tes, menyimpan dan menerbitkan ulang halaman</td></tr>
+<tr><td>Berita, properti</td><td>Setiap hari pukul 06.00 WIB</td><td>Sama, per kota, lalu menyusun ulang penyesuaian berita tiap kecamatan</td></tr>
+<tr><td>Tombol perbarui sekarang</td><td>Saat Anda menekannya</td><td>Menjalankan pekerjaan harian yang sama saat itu juga (perlu token GitHub dengan akses Actions); halaman berubah beberapa menit kemudian</td></tr>
+<tr><td>Survei harga Bank Indonesia</td><td>Dicek di proses harian</td><td>Bila triwulan baru terbit, halaman menampilkan pemberitahuan dan issue GitHub dibuka. Angka baru ditambahkan manual ke <code>rppi.csv</code>; dua triwulan terbaru lalu dipakai otomatis</td></tr>
+<tr><td>Aktivitas OpenStreetMap, properti</td><td>Tanggal 1 setiap bulan pukul 05.00 WIB, dan saat kota ditambahkan</td><td>Menyusun ulang grid aktivitas tiap kota untuk keramaian</td></tr>
+<tr><td>Lainnya</td><td>Saat berkas data diubah</td><td>Imbal hasil, IRBI, kelas bahaya, permintaan, likuiditas, stasiun dan patokan hanya berubah bila berkas CSV diedit</td></tr>
+</tbody></table></div>
+<p class="small muted">Pada jam sibuk GitHub bisa memulai pekerjaan terjadwal terlambat beberapa menit, kadang lebih.</p>
+</section>
+
+<section id="id-judgement">
+<h2>8. Penilaian sendiri dan batasan</h2>
+<ul>
+  <li><b>Titik acuan</b> (pertumbuhan −0,5% sampai 3%, imbal hasil 3% sampai 10%, 1,3× sampai 0,7× patokan, dan seterusnya) dipilih agar kota dan kecamatan di Indonesia tersebar di sepanjang skala. Mengubah satu titik mengubah semua skor.</li>
+  <li><b>Tingkat bahaya, permintaan dan likuiditas</b> kota dan kecamatan ditetapkan manual dari riset dan berita, bukan diukur. Kecamatan di luar Jakarta masih tahap awal tanpa survei lokasi.</li>
+  <li><b>Campuran bahaya</b>: 60% tingkat lokal dan 40% IRBI provinsi untuk kota, serta 45% banjir, 35% penurunan tanah dan 20% pesisir untuk properti, adalah bobot penilaian.</li>
+  <li><b>Besar pengaruh berita</b>: 2 poin per tingkat kekuatan, waktu paruh 30 hari, 90 hari, batas-batasnya serta porsi 0,4 dan 0,5 ditetapkan agar berita bisa menentukan pilihan yang tipis tetapi tidak mengalahkan fundamental. Angka ini tidak dicocokkan dengan data.</li>
+  <li><b>Pencocokan judul masih kasar.</b> Ia membaca kata, bukan makna: "banjir" dalam berita pencegahan banjir, atau jalan tol yang disebut dalam berita kemacetan, bisa salah dihitung. Dasbor mencantumkan setiap judul yang menggeser skor, beserta tautannya. Baca beritanya sebelum mengandalkannya.</li>
+  <li><b>Kelas penumpang stasiun</b> masih angka sementara, dan OpenStreetMap lebih tipis di kota kecil, jadi skor keramaian rendah bisa berarti "belum dipetakan", bukan "sepi".</li>
+  <li>Ini alat penyaringan untuk memutuskan di mana melihat lebih dekat. Ini bukan nasihat investasi, hukum atau teknik: periksa sertifikat lewat notaris/PPAT, survei lokasi dan risikonya sebelum membeli.</li>
+</ul>
+</section>
+</article>
+</main>
+
+<footer><div class="wrap"><p data-l="en">Source code: <a href="https://github.com/mettpp/cities/blob/main/pipeline/score.py">score.py</a>, <a href="https://github.com/mettpp/cities/blob/main/pipeline/weights.json">weights.json</a>, <a href="https://github.com/mettpp/cities/blob/main/pipeline/news.py">news.py</a> and <a href="https://github.com/mettpp/cities/blob/main/pipeline/news_config.json">news_config.json</a> for cities; <a href="https://github.com/mettpp/properties/blob/main/dashboard/scoring.js">scoring.js</a> and <a href="https://github.com/mettpp/properties/blob/main/pipeline/news_config.json">news_config.json</a> for properties.</p>
+<p data-l="id" hidden>Kode sumber: <a href="https://github.com/mettpp/cities/blob/main/pipeline/score.py">score.py</a>, <a href="https://github.com/mettpp/cities/blob/main/pipeline/weights.json">weights.json</a>, <a href="https://github.com/mettpp/cities/blob/main/pipeline/news.py">news.py</a> dan <a href="https://github.com/mettpp/cities/blob/main/pipeline/news_config.json">news_config.json</a> untuk kota; <a href="https://github.com/mettpp/properties/blob/main/dashboard/scoring.js">scoring.js</a> dan <a href="https://github.com/mettpp/properties/blob/main/pipeline/news_config.json">news_config.json</a> untuk properti.</p></div></footer>
+
+<script>
+(function () {
+  "use strict";
+  // Copied from RE-screening pipeline/news_config.json (rules) and settings; the property ranking adds
+  // capital-move-offices. Keep in step when a rule changes there.
+  const PER_STRENGTH = 2, HALF_LIFE = 30, WINDOW = 90;
+  const CAP = { safety: 8, demand: 8, liquidity: 8, momentum: 5, yield: 4 };
+  const RULES = [
+    ["flood", "safety", -1, 1, "local", "banjir, flood, terendam, banjir rob", "Flood", "Banjir"],
+    ["flash-flood-landslide", "safety", -1, 2, "local", "banjir bandang, flash flood, longsor", "Flash flood or landslide", "Banjir bandang atau longsor"],
+    ["earthquake-volcano", "safety", -1, 2, "local", "gempa, earthquake, tsunami, erupsi", "Earthquake, tsunami or eruption", "Gempa, tsunami atau erupsi"],
+    ["subsidence", "safety", -1, 1, "local", "penurunan tanah, land subsidence", "Land subsidence", "Penurunan tanah"],
+    ["flood-defence", "safety", 1, 1, "local", "tanggul laut, sea wall, rumah pompa, waduk", "Flood defence", "Pertahanan banjir"],
+    ["infrastructure-opens", "demand", 1, 2, "local", "tol, MRT, stasiun, bandara + diresmikan / beroperasi", "Infrastructure opens", "Infrastruktur dibuka"],
+    ["infrastructure-starts", "demand", 1, 1, "local", "groundbreaking, mulai dibangun, tender", "Construction starts", "Pembangunan dimulai"],
+    ["investment", "demand", 1, 1, "local", "investasi, pabrik baru, KEK, data center", "New investment", "Investasi baru"],
+    ["investment-loss", "demand", -1, 2, "local", "PHK, layoff, pabrik tutup, mangkrak", "Layoffs, closures, stalled projects", "PHK, pabrik tutup, proyek mangkrak"],
+    ["tourism-up", "demand", 1, 1, "local", "wisatawan, tourist + naik / rekor", "Tourism up", "Wisata naik"],
+    ["tourism-down", "demand", -1, 1, "local", "wisatawan, tourist + turun / sepi", "Tourism down", "Wisata turun"],
+    ["capital-move-setback", "demand", -1, 2, "local", "IKN dipangkas, pemindahan ditunda", "Capital move setback", "Pemindahan ibu kota tertunda"],
+    ["unrest", "demand", -1, 1, "local", "kerusuhan, ricuh, riot, bentrok", "Unrest", "Kerusuhan"],
+    ["capital-move-offices", "demand", -1, 1, "props", "pindah ke IKN, relokasi ASN", "Government offices move to Nusantara (properties only)", "Kantor pemerintah pindah ke Nusantara (hanya properti)"],
+    ["property-prices-up", "momentum", 1, 1, "any", "harga rumah, property price + naik / rise", "Property prices up", "Harga properti naik"],
+    ["property-prices-down", "momentum", -1, 1, "any", "harga rumah, property price + turun / fall", "Property prices down", "Harga properti turun"],
+    ["rates-down", "momentum", 1, 1, "any", "suku bunga turun, BI-Rate turun, rate cut", "Interest rate cut", "Suku bunga turun"],
+    ["rates-up", "momentum", -1, 1, "any", "suku bunga naik, BI-Rate naik, rate hike", "Interest rate rise", "Suku bunga naik"],
+    ["housing-incentive", "momentum", 1, 1, "any", "PPN DTP, insentif PPN, KPR subsidi, FLPP", "Housing incentive", "Insentif perumahan"],
+    ["housing-incentive-ends", "momentum", -1, 1, "any", "insentif PPN + dicabut / berakhir", "Housing incentive ends", "Insentif perumahan berakhir"],
+    ["sales-up", "liquidity", 1, 1, "any", "penjualan rumah, property sales + naik", "Property sales up", "Penjualan properti naik"],
+    ["sales-down", "liquidity", -1, 1, "any", "penjualan rumah, oversupply + turun / lesu", "Property sales down", "Penjualan properti turun"],
+    ["rents-up", "yield", 1, 1, "local", "harga sewa, rental + naik", "Rents up", "Sewa naik"],
+    ["rents-down", "yield", -1, 1, "local", "harga sewa, rental + turun / sepi", "Rents down", "Sewa turun"],
+  ];
+  const L = {
+    en: { f: { safety: "Hazard safety", demand: "Demand", liquidity: "Liquidity", momentum: "Price momentum", yield: "Rental yield" },
+      scope: { local: "Yes", any: "No, nationwide at 40%", props: "Yes" }, propsNote: " (counts as demand for properties)",
+      out: (p, sub, adj, cap, n, age) => age > WINDOW ? `Older than ${WINDOW} days: the headline no longer counts.` :
+        `<b>${fmt(p)}</b> points on ${sub} from this headline. ` + (n > 1 ? `With ${n} such stories on different days the total of ${fmt(p * n)} is capped to <b>${fmt(adj)}</b> (limit ±${cap}).` : `After the ±${cap} cap: <b>${fmt(adj)}</b>.`) },
+    id: { f: { safety: "Keamanan bencana", demand: "Permintaan", liquidity: "Likuiditas", momentum: "Momentum harga", yield: "Imbal hasil sewa" },
+      scope: { local: "Ya", any: "Tidak, nasional 40%", props: "Ya" }, propsNote: " (dihitung sebagai permintaan untuk properti)",
+      out: (p, sub, adj, cap, n, age) => age > WINDOW ? `Lebih dari ${WINDOW} hari: berita ini tidak dihitung lagi.` :
+        `<b>${fmt(p)}</b> poin pada ${sub} dari berita ini. ` + (n > 1 ? `Dengan ${n} berita serupa di hari berbeda, total ${fmt(p * n)} dibatasi menjadi <b>${fmt(adj)}</b> (batas ±${cap}).` : `Setelah batas ±${cap}: <b>${fmt(adj)}</b>.`) },
+  };
+  const lang = () => (window.SiteMenu && window.SiteMenu.lang()) || "en";
+  let fmt = v => (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  function rulesTable(l) {
+    const t = L[l], body = document.getElementById(l + "-rules-body");
+    body.innerHTML = RULES.map(([id, f, dir, s, scope, words, en, idn]) => {
+      const p = dir * s * PER_STRENGTH;
+      const note = (f === "momentum" || f === "yield") ? `<span class="muted small">${t.propsNote}</span>` : "";
+      return `<tr><td>${esc(l === "id" ? idn : en)}</td><td class="small muted">${esc(words)}</td><td>${t.f[f]}${note}</td><td class="n ${p > 0 ? "pos" : "neg"}">${fmt(p)}</td><td>${t.scope[scope]}</td></tr>`;
+    }).join("");
+  }
+
+  function calc(l) {
+    const box = document.getElementById(l + "-calc"), t = L[l];
+    const sel = box.querySelector('[data-k="rule"]');
+    sel.innerHTML = RULES.map(([id, f, dir, s, , , en, idn], i) => `<option value="${i}"${id === "flood" ? " selected" : ""}>${esc(l === "id" ? idn : en)} (${fmt(dir * s * PER_STRENGTH)})</option>`).join("");
+    const out = box.parentElement.querySelector('[data-k="out"]');
+    const run = () => {
+      const [, f, dir, s] = RULES[+sel.value];
+      const share = +box.querySelector('[data-k="share"]').value;
+      const age = Math.max(0, +box.querySelector('[data-k="age"]').value || 0);
+      const n = Math.max(1, Math.round(+box.querySelector('[data-k="n"]').value || 1));
+      const p = dir * s * PER_STRENGTH * share * Math.pow(0.5, age / HALF_LIFE);
+      const cap = CAP[f], adj = cap * Math.tanh((p * n) / cap);
+      out.innerHTML = t.out(p, t.f[f], adj, cap, n, age);
+    };
+    box.addEventListener("input", run); run();
+  }
+
+  function paint() {
+    const l = lang() === "id" ? "id" : "en";
+    document.documentElement.lang = l;
+    document.querySelectorAll("[data-l]").forEach(el => { el.hidden = el.dataset.l !== l; });
+    fmt = v => { const s = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1); return l === "id" ? s.replace(".", ",") : s; };
+    rulesTable(l); calc(l);
+    document.title = l === "id" ? "Cara skor dihitung · Property Portfolio" : "How the scores work · Property Portfolio";
+  }
+  document.addEventListener("site-lang", paint);
+  paint();
+})();
+</script>
+</body>
+</html>
