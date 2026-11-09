@@ -39,10 +39,16 @@ body::-webkit-scrollbar { width:10px; height:10px; }
 body::-webkit-scrollbar-thumb { background:var(--line); border-radius:6px; }
 body::-webkit-scrollbar-thumb:hover { background:var(--ink-2); }
 .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
-/* The one authored motion moment on this page: a short, staggered rise for the hero and the two
-   destination groups on first paint. Pure CSS keyed to initial layout, not to the JS paint() pass
-   that repaints text on load/scores/feed/language changes -- those only mutate textContent on
-   already-rendered nodes, so this never replays on a re-render. Respects reduced motion. */
+/* The one authored motion moment on this page: a short rise for the hero and the two destination
+   groups on first paint. Pure CSS keyed to initial layout, not to the JS paint() pass that repaints
+   text on load/scores/feed/language changes -- those only mutate textContent on already-rendered
+   nodes, so this never replays on a re-render. Respects reduced motion.
+   .group and .tool-wrap sit side by side as two parallel, equal-weight destinations, not a reading
+   sequence, so they share one delay and rise together -- staggering them the way the hero's own
+   h1->p->reassure->resume sequence staggers (a real top-to-bottom reading order) instead produced a
+   few hundred ms where the two columns' tops/bottoms visibly disagreed: a jagged "step" across the
+   row rather than one straight line, worst at wider widths where the row is long enough to notice
+   (Nov 2026 feedback, caught right after a reload). */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
   .hero h1, .hero p, .hero .reassure, .hero .resume, .tools > .group, .tools > .tool-wrap {
@@ -51,8 +57,7 @@ body::-webkit-scrollbar-thumb:hover { background:var(--ink-2); }
   .hero p { animation-delay:.06s; }
   .hero .reassure { animation-delay:.11s; }
   .hero .resume { animation-delay:.16s; }
-  .tools > .group { animation-delay:.14s; }
-  .tools > .tool-wrap { animation-delay:.22s; }
+  .tools > .group, .tools > .tool-wrap { animation-delay:.18s; }
 }
 /* Horizontal inset matches .part.solo's own padding (24px) below — without it, the hero and footer text
    sit flush against the page gutter while the card's text is inset an extra 24px by its own padding, so
