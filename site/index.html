@@ -11,10 +11,17 @@
   /* A tighter contact shadow plus a soft, low ambient one, in the ink hue rather than plain black — same
      token as the asset app's floating panels, so a card here and a card there read as one material. */
   --float-shadow: 0 1px 2px rgba(27, 31, 28, .06), 0 10px 24px -8px rgba(27, 31, 28, .18);
-  --float-shadow-hover: 0 2px 4px rgba(27, 31, 28, .08), 0 16px 32px -10px rgba(27, 31, 28, .24); }
+  --float-shadow-hover: 0 2px 4px rgba(27, 31, 28, .08), 0 16px 32px -10px rgba(27, 31, 28, .24);
+  /* A deeper, border-free weight for the cards that are actual destinations (Cities, Properties, My
+     assets) -- same token as the Property finder and asset app's own feature cards, so a "go here"
+     card reads the same weight everywhere in the product, not just on this page. */
+  --feature-shadow: 0 2px 5px rgba(27, 31, 28, .07), 0 20px 40px -12px rgba(27, 31, 28, .22);
+  --feature-shadow-hover: 0 3px 7px rgba(27, 31, 28, .09), 0 26px 52px -12px rgba(27, 31, 28, .28); }
 @media (prefers-color-scheme: dark) { :root { --paper:#121614; --surface:#1a201d; --ink:#e6ece8; --ink-2:#a9b5ae; --line:#2c3531; --green:#5fc3a6; --green-dark:#7fd6bb; --on-green:#0d1311; --wash:#203029; --blue:#6cb6e0; color-scheme:dark;
   --float-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 12px 28px -8px rgba(0, 0, 0, .55);
-  --float-shadow-hover: 0 2px 4px rgba(0, 0, 0, .35), 0 20px 40px -10px rgba(0, 0, 0, .65); } }
+  --float-shadow-hover: 0 2px 4px rgba(0, 0, 0, .35), 0 20px 40px -10px rgba(0, 0, 0, .65);
+  --feature-shadow: 0 2px 6px rgba(0, 0, 0, .35), 0 24px 48px -12px rgba(0, 0, 0, .65);
+  --feature-shadow-hover: 0 3px 8px rgba(0, 0, 0, .4), 0 30px 56px -12px rgba(0, 0, 0, .7); } }
 * { box-sizing:border-box; }
 /* A faint paper grain under the flat --paper fill — the one material cue "paper, ink, green" promises
    but a solid colour alone can't give. Generated once as an SVG noise filter, not a photo asset, so it
@@ -24,9 +31,31 @@ body { margin:0; background-color:var(--paper);
   color:var(--ink); font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; accent-color:var(--green); }
 a { color:var(--green-dark); text-underline-offset:2px; }
 :focus-visible { outline:3px solid var(--green); outline-offset:2px; border-radius:4px; }
+/* The parts nobody draws on purpose still carry the design -- the cheapest, most reliable tell that
+   a page was built rather than assembled from browser defaults. */
+::selection { background:var(--green); color:var(--on-green); }
+html { scrollbar-color:var(--line) transparent; }
+body::-webkit-scrollbar { width:10px; height:10px; }
+body::-webkit-scrollbar-thumb { background:var(--line); border-radius:6px; }
+body::-webkit-scrollbar-thumb:hover { background:var(--ink-2); }
 .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
-/* Horizontal inset matches .tool's own padding (24px) below — without it, the hero and footer text sit
-   flush against the page gutter while every card's text is inset an extra 24px by its own padding, so
+/* The one authored motion moment on this page: a short, staggered rise for the hero and the two
+   destination groups on first paint. Pure CSS keyed to initial layout, not to the JS paint() pass
+   that repaints text on load/scores/feed/language changes -- those only mutate textContent on
+   already-rendered nodes, so this never replays on a re-render. Respects reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  .hero h1, .hero p, .hero .reassure, .hero .resume, .tools > .group, .tools > .tool-wrap {
+    animation:rise .5s cubic-bezier(.16,1,.3,1) both; }
+  .hero h1 { animation-delay:0s; }
+  .hero p { animation-delay:.06s; }
+  .hero .reassure { animation-delay:.11s; }
+  .hero .resume { animation-delay:.16s; }
+  .tools > .group { animation-delay:.14s; }
+  .tools > .tool-wrap { animation-delay:.22s; }
+}
+/* Horizontal inset matches .part.solo's own padding (24px) below — without it, the hero and footer text
+   sit flush against the page gutter while the card's text is inset an extra 24px by its own padding, so
    scanning down the left margin the edge steps in and out instead of running straight. */
 .hero { padding:72px 24px 48px; }
 .hero h1 { font-size:clamp(36px, 6vw, 64px); line-height:1.05; letter-spacing:-.03em; margin:0 0 16px; max-width:16ch; }
@@ -39,24 +68,32 @@ a { color:var(--green-dark); text-underline-offset:2px; }
 .btn:hover { background:var(--green-dark); color:var(--on-green); }
 .resume small { color:var(--ink-2); }
 .tools { display:grid; gap:16px; grid-template-columns:minmax(0, 2fr) minmax(0, 1fr); padding-bottom:48px; }
-.parts { display:grid; gap:12px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:auto; }
+/* Property finder is a labelled zone, not a card wrapped around two more cards -- nested cards are
+   always the wrong call. Cities and Properties below are the real destinations and carry the weight;
+   this is just their shared heading and lede, promoted to a tinted zone only when it is the suggested
+   start for a first-time visitor (see .lead-screening below), plain content otherwise. */
+.group { display:flex; flex-direction:column; gap:12px; min-width:0; border-radius:12px; position:relative; }
+.group h2, .part.solo h2 { margin:0; display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-.02em; line-height:1.15; }
+.group h2 { font-size:28px; }
+.part.solo h2 { font-size:21px; }
+.group h2 .num, .part.solo h2 .num { flex:none; width:26px; height:26px; border-radius:999px; background:var(--wash); color:var(--green-dark); font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; font-variant-numeric:tabular-nums; }
+.group h2 svg, .part.solo h2 svg { flex:none; width:20px; height:20px; fill:none; stroke:var(--green); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.tools.lead-screening .group h2 .num { background:var(--surface); }
+.group p, .part.solo p { margin:0; color:var(--ink-2); }
+.parts { display:grid; gap:12px; grid-template-columns:repeat(2, minmax(0, 1fr)); margin-top:4px; }
 @media (max-width:600px) { .parts { grid-template-columns:1fr; } }
-.part { display:flex; flex-direction:column; gap:6px; background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px; text-decoration:none; color:var(--ink);
-  box-shadow:var(--float-shadow); transition:border-color .15s, box-shadow .15s, transform .15s; }
-.part:hover { border-color:var(--green); box-shadow:var(--float-shadow-hover); transform:translateY(-1px); }
+/* The real destinations -- Cities, Properties, My assets -- share one card weight: borderless with a
+   deeper two-layer shadow, so each reads as a place to go rather than a bordered box sitting flush
+   with its own non-card section. */
+.part { display:flex; flex-direction:column; gap:6px; background:var(--surface); border:none; border-radius:10px; padding:16px; text-decoration:none; color:var(--ink);
+  box-shadow:var(--feature-shadow); transition:box-shadow .15s, transform .15s; }
+.part:hover { box-shadow:var(--feature-shadow-hover); transform:translateY(-2px); }
 .part > b { font-size:17px; }
 .part .live { margin-top:auto; }
+.part.solo { gap:12px; padding:24px; min-width:0; height:100%; position:relative; }
+.part[aria-disabled] { cursor:default; box-shadow:var(--float-shadow); }
+.part[aria-disabled] h2 { color:var(--ink-2); }
 @media (max-width:900px) { .tools { grid-template-columns:1fr; } .hero { padding:44px 0 28px; } }
-.tool { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:24px; display:flex; flex-direction:column; gap:12px; min-width:0; text-decoration:none; color:var(--ink);
-  box-shadow:var(--float-shadow); transition:border-color .15s, box-shadow .15s, transform .15s; position:relative; }
-a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:var(--float-shadow-hover); transform:translateY(-1px); }
-.tool[aria-disabled] { cursor:default; }
-.tool[aria-disabled] h2 { color:var(--ink-2); }
-.step { font-size:13px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); display:flex; gap:10px; align-items:center; }
-.step svg { width:16px; height:16px; padding:7px; box-sizing:content-box; background:var(--wash); border-radius:999px; fill:none; stroke:var(--green); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-.tools.lead-screening .tool#t-finder .step svg { background:var(--surface); }
-.tool h2 { margin:0; font-size:26px; letter-spacing:-.02em; line-height:1.15; }
-.tool p { margin:0; color:var(--ink-2); }
 .live { margin-top:auto; border-top:1px solid var(--line); padding-top:12px; font-size:14px; min-height:96px; }
 .live ol { margin:4px 0 0; padding-left:20px; }
 .live li { font-variant-numeric:tabular-nums; }
@@ -64,17 +101,17 @@ a.tool:not([aria-disabled]):hover { border-color:var(--green); box-shadow:var(--
 .go { font-weight:600; color:var(--green-dark); }
 /* Default-visitor emphasis: when nobody has a section to resume to, the Property finder reads as the entry point
    the product's own "1 · Find / 2 · Run" sequence implies. */
-/* The lead card gets a warm wash, not just a border swap — a colour change alone reads as a state
-   toggle; a tint reads as "this one's considered the start," which is what the emphasis means here. */
-.tools.lead-screening .tool#t-finder { background:var(--wash); border-color:var(--green); }
-@media (min-width:901px) { .tools.lead-screening .tool#t-finder { padding:28px; } .tools.lead-screening .tool:not(#t-finder) { opacity:.88; } }
-.start-badge { position:absolute; top:-10px; left:20px; background:var(--green); color:var(--on-green); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; }
+/* The lead zone gets a warm wash and a real border here -- a deliberate "this one is selected" state,
+   not the page's default card device, so it stays a single, legible signal rather than one more
+   generic bordered box. */
+.tools.lead-screening .group { background:var(--wash); border:1px solid var(--green); padding:24px; }
+@media (min-width:901px) { .tools.lead-screening .group { padding:28px; } .tools.lead-screening .tool-wrap .part { opacity:.88; } }
+.start-badge { display:inline-flex; align-self:flex-start; background:var(--green); color:var(--on-green); font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; margin-bottom:-2px; }
 .start-badge[hidden] { display:none; }
-/* The notify link is a sibling of .tool (an <a> can't nest another <a>), positioned so it never steals
-   height from .tool-wrap's grid cell — otherwise .tool would be shorter than the other two cards and its
+/* The notify link is a sibling of .part (an <a> can't nest another <a>), positioned so it never steals
+   height from .tool-wrap's grid cell — otherwise .part would be shorter than the other cards and its
    bottom row (the "Coming soon" badge) would land higher than their "Open →" baseline. */
 .tool-wrap { position:relative; min-width:0; }
-.tool-wrap .tool { height:100%; }
 .notify { position:absolute; top:100%; left:2px; margin-top:8px; padding:8px 2px; display:inline-block; min-height:44px; box-sizing:border-box; font-size:13px; color:var(--green-dark); text-decoration:underline; text-underline-offset:2px; }
 .notify[hidden] { display:none; }
 .soon { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); background:var(--wash); padding:3px 9px; border-radius:999px; align-self:flex-start; }
@@ -98,10 +135,9 @@ footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
   </section>
 
   <section class="tools" id="tools" aria-label="Sections">
-    <div class="tool finder" id="t-finder">
+    <div class="group" id="t-finder">
       <span class="start-badge" id="start-badge" data-t="startHere" hidden>Start here</span>
-      <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span data-t="s1">1 · Find</span></span>
-      <h2 data-t="finder">Property finder</h2>
+      <h2><span class="num" aria-hidden="true">1</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><span data-t="finder">Property finder</span></h2>
       <p data-t="finderLead">Start from 27 Indonesian locations ranked for develop-and-sell, buy-to-sell or buy-to-rent, then open a city and rank the listings or plots you are looking at there, with flood, transit, certificate and price checks.</p>
       <div class="parts">
         <a class="part" id="t-screening" href="#">
@@ -119,9 +155,8 @@ footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
       </div>
     </div>
     <div class="tool-wrap">
-      <a class="tool" id="t-assets" href="#">
-        <span class="step"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="s3">2 · Run</span></span>
-        <h2 data-t="assets">My assets</h2>
+      <a class="part solo" id="t-assets" href="#">
+        <h2><span class="num" aria-hidden="true">2</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-3 8 3v16M9 21v-5h6v5M8 9h2M14 9h2M8 13h2M14 13h2"/></svg><span data-t="assets">My assets</span></h2>
         <p data-t="assetsLead">Rent, deposits, utility bills and taxes, documents and finance for your portfolio, for you and your managers, collectors and accountant.</p>
         <div class="live" id="live-assets"></div>
         <span class="soon" id="assets-soon" data-t="comingSoon" hidden>Coming soon</span>
@@ -148,7 +183,6 @@ footer p { margin:0 0 6px; padding:0 24px; max-width:90ch; }
       resumeNote: "Anda bisa pindah kapan saja lewat tombol Menu di atas.", resume: "Lanjut ke",
       reassure: "Hanya penyaringan, bukan nasihat investasi atau hukum — selalu periksa lewat notaris/PPAT sebelum membeli.",
       startHere: "Mulai di sini", comingSoon: "Segera hadir", notifyMe: "Pantau progres hosting di GitHub →",
-      s1: "1 · Temukan", s3: "2 · Kelola",
       finder: "Pencari properti", screening: "1 · Kota", jakarta: "2 · Properti", assets: "Aset saya",
       finderLead: "Mulai dari 27 lokasi di Indonesia yang diperingkat untuk bangun-dan-jual, beli-untuk-dijual atau beli-untuk-disewakan, lalu buka satu kota dan peringkatkan listing atau kavling yang Anda incar di sana, dengan cek banjir, transportasi, sertifikat dan harga.",
       openCities: "Bandingkan kota →", openProps: "Peringkatkan properti →",
